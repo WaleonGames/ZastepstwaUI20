@@ -1,0 +1,1136 @@
+/* === MOTYW CIEMNY (DOMYŚLNY) === */
+:root {
+  /* Akcenty i statusy */
+  --color-accent: #58a6ff;
+  --color-accent-hover: #79b8ff;
+  --color-success: #2ea043;
+  --color-danger: #f85149;
+  --color-info: #58a6ff;
+
+  /* Tła i ramki */
+  --color-bg-main: #0d1117;
+  --color-bg-card: #161b22;
+  --color-bg-alt: #1b1f27;
+  --color-border: #2a2f35;
+  --color-border-light: #222;
+
+  /* Tekst */
+  --text-main: #e6edf3;
+  --text-muted: #b7beca;
+  --text-secondary: #c9d1d9;
+
+  /* Cienie */
+  --shadow-dark: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  /* Gradienty */
+  --gradient-topbar: linear-gradient(180deg, #161b22 0%, #0f1318 100%);
+  --gradient-footer: linear-gradient(0deg, #161b22 0%, #0f1318 100%);
+  --gradient-card: linear-gradient(180deg, #161b22 0%, #0e1116 100%);
+}
+
+/* === MOTYW JASNY === */
+[data-theme="light"] {
+  --color-accent: #0d6efd;
+  --color-accent-hover: #469cff;
+  --color-success: #198754;
+  --color-danger: #dc3545;
+  --color-info: #0d6efd;
+
+  --color-bg-main: #f8f9fa;
+  --color-bg-card: #ffffff;
+  --color-bg-alt: #e9ecef;
+  --color-border: #dee2e6;
+  --color-border-light: #dee2e6;
+
+  --text-main: #212529;
+  --text-muted: #6c757d;
+  --text-secondary: #495057;
+
+  --shadow-dark: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --shadow-light: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  --gradient-topbar: linear-gradient(180deg, #ffffff 0%, #e9ecef 100%);
+  --gradient-footer: linear-gradient(0deg, #ffffff 0%, #f1f3f5 100%);
+  --gradient-card: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+body {
+  background-color: var(--color-bg-main);
+  color: var(--text-main);
+  font-family: "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 0;
+  transition: background 0.3s, color 0.3s;
+}
+
+.topbar {
+  background: var(--gradient-topbar);
+  border-bottom: 1px solid var(--color-border-light) !important;
+  box-shadow: var(--shadow-dark);
+}
+
+.topbar .topbar-title {
+  color: var(--color-accent);
+}
+
+.footer-nav {
+  background: var(--gradient-footer);
+  border-top: 1px solid var(--color-border-light) !important;
+  box-shadow: var(--shadow-dark);
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------
+ * === STRONA GŁÓWNA PUBLICZNEGO UCZNIA (zu-index) ===
+ * -------------------------------------------------------- */
+
+/* --------------------------------------------------------
+ * === STRONA GŁÓWNA PUBLICZNEGO UCZNIA (zu-index)
+ * -------------------------------------------------------- */
+
+.zu-index {
+  background-color: var(--color-bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 2rem 0;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* --- Nagłówek sekcji --- */
+.zu-index h2 {
+  color: var(--color-accent);
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+  margin-bottom: 2rem;
+}
+
+/* --- Kolumny i odstępy --- */
+.zu-index .row.g-3 {
+  row-gap: 1.5rem;
+}
+
+/* --- Karty główne --- */
+.zu-index .card {
+  background: var(--gradient-card) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 14px !important;
+  color: var(--text-main);
+  box-shadow: var(--shadow-dark);
+  transition: all 0.25s ease;
+}
+
+.zu-index .card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 12px rgba(88, 166, 255, 0.25);
+}
+
+/* --- Karty z linkami (hover-card) --- */
+.zu-index .hover-card {
+  cursor: pointer;
+  padding: 1.8rem 1.2rem;
+  background: var(--color-bg-card) !important;
+  text-align: center;
+  border-radius: 12px;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.zu-index .hover-card i {
+  color: var(--color-accent);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s ease, color 0.3s ease;
+}
+
+.zu-index .hover-card:hover i {
+  color: var(--color-accent-hover);
+  transform: scale(1.15);
+}
+
+.zu-index .hover-card h5 {
+  color: var(--color-accent);
+  margin-bottom: 0.4rem;
+}
+
+.zu-index .hover-card p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* --- Panel boczny (wydarzenia) --- */
+.zu-index .list-group-item {
+  background: var(--color-bg-card) !important;
+  border-color: var(--color-border) !important;
+  color: var(--text-secondary) !important;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.zu-index .list-group-item:hover {
+  background: rgba(88, 166, 255, 0.08) !important;
+  color: var(--text-main) !important;
+}
+
+/* --- Nagłówki kart bocznych --- */
+.zu-index .card-header {
+  font-weight: 600;
+  color: var(--color-accent);
+  border-bottom: 1px solid var(--color-border-light) !important;
+  background: transparent !important;
+}
+
+/* --- Panel statystyk --- */
+.zu-index .card-body p strong {
+  color: var(--color-accent);
+}
+
+/* --- Responsywność --- */
+@media (max-width: 991px) {
+  .zu-index {
+    padding: 1.2rem 0;
+  }
+
+  .zu-index h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* --------------------------------------------------------
+ * === STRONA ZASTĘPSTW (zu-substitutions) ===
+ * -------------------------------------------------------- */
+/* --------------------------------------------------------
+ * === STRONA ZASTĘPSTW (zu-substitutions)
+ * -------------------------------------------------------- */
+
+.zu-substitutions {
+  background-color: var(--color-bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* === Boczne menu z dwoma sekcjami === */
+.zu-substitutions .sidebar {
+  width: 240px;
+  background: var(--gradient-card);
+  border-right: 1px solid var(--color-border-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: fixed;
+  top: 56px;
+  bottom: 60px;
+  overflow-y: auto;
+  padding: 1rem;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+/* --- Górna sekcja (dni) --- */
+.zu-substitutions .sidebar-top {
+  margin-bottom: 1rem;
+}
+
+.zu-substitutions .sidebar .day {
+  display: block;
+  padding: 10px 14px;
+  text-decoration: none;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--color-border);
+  border-radius: 6px;
+  transition: all 0.25s ease;
+}
+
+.zu-substitutions .sidebar .day:hover {
+  background: rgba(88, 166, 255, 0.08);
+  color: var(--color-accent);
+}
+
+.zu-substitutions .sidebar .day.active {
+  background: rgba(88, 166, 255, 0.2);
+  color: var(--color-accent);
+  font-weight: 600;
+  border-left: 4px solid var(--color-accent);
+}
+
+/* --- Dolna sekcja (filtry) --- */
+.zu-substitutions .sidebar-bottom {
+  border-top: 1px solid var(--color-border);
+  padding-top: 1rem;
+}
+
+.zu-substitutions .filter-form {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  box-shadow: var(--shadow-dark);
+}
+
+.zu-substitutions .form-check-label {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.zu-substitutions .form-check-input {
+  background-color: var(--color-bg-main);
+  border-color: var(--color-border);
+}
+
+.zu-substitutions .form-check-input:checked {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.zu-substitutions .btn-primary {
+  background: var(--color-accent);
+  border: none;
+  font-weight: 500;
+  color: #fff;
+  transition: background 0.25s;
+}
+
+.zu-substitutions .btn-primary:hover {
+  background: var(--color-accent-hover);
+}
+
+/* --- Główna sekcja --- */
+.zu-substitutions main {
+  margin-left: 240px;
+  padding: 2rem 3rem;
+  width: calc(100% - 240px);
+}
+
+.zu-substitutions h2.section-title {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(88, 166, 255, 0.25);
+  margin-bottom: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* === TABELA ZASTĘPSTW === */
+.zu-substitutions table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-dark);
+  transition: background 0.3s, border 0.3s;
+}
+
+.zu-substitutions th,
+.zu-substitutions td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.zu-substitutions th {
+  background: var(--color-bg-alt);
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.zu-substitutions td {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.zu-substitutions tr:hover td {
+  background: rgba(88, 166, 255, 0.05);
+}
+
+/* === KOLORY STATUSÓW === */
+.zu-substitutions .table-sub td {
+  background: rgba(46, 160, 67, 0.05);
+}
+.zu-substitutions .table-sub:hover td {
+  background: rgba(46, 160, 67, 0.1);
+}
+
+.zu-substitutions .table-merge td {
+  background: rgba(88, 166, 255, 0.05);
+}
+.zu-substitutions .table-merge:hover td {
+  background: rgba(88, 166, 255, 0.1);
+}
+
+.zu-substitutions .table-cancel td {
+  background: rgba(248, 81, 73, 0.05);
+}
+.zu-substitutions .table-cancel:hover td {
+  background: rgba(248, 81, 73, 0.1);
+}
+
+/* === WIDOK GRUPOWANY (klasa/nauczyciel) === */
+.zu-substitutions .log-day {
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.25rem;
+}
+
+.zu-substitutions .log-box {
+  background: var(--color-bg-card);
+  color: var(--text-secondary);
+  padding: 1rem 1.4rem;
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 1.5rem;
+  font-family: "Consolas", monospace;
+  line-height: 1.45;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow-dark);
+  transition: background 0.3s, color 0.3s;
+}
+
+.zu-substitutions .log-box strong {
+  color: var(--color-accent);
+}
+
+.zu-substitutions .log-box .text-info {
+  color: var(--color-accent-hover) !important;
+}
+
+/* === BRAK DANYCH === */
+.zu-substitutions .no-data {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: var(--shadow-dark);
+  margin-top: 2rem;
+  width: 100%;
+  transition: background 0.3s, color 0.3s;
+}
+
+.zu-substitutions .no-data h3 {
+  color: var(--color-accent);
+}
+
+/* === RESPONSYWNOŚĆ === */
+@media (max-width: 991px) {
+  .zu-substitutions {
+    flex-direction: column;
+  }
+
+  .zu-substitutions .sidebar {
+    position: relative;
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border-light);
+  }
+
+  .zu-substitutions .sidebar a.day {
+    flex: 1;
+    text-align: center;
+    border-bottom: none;
+    border-right: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+
+  .zu-substitutions main {
+    margin: 0;
+    width: 100%;
+    padding: 1.2rem;
+  }
+
+  .zu-substitutions table th,
+  .zu-substitutions table td {
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+
+  .zu-substitutions .log-box {
+    font-size: 0.85rem;
+    padding: 0.9rem 1rem;
+  }
+}
+
+/* --------------------------------------------------------
+ * === STRONA KLAS I UCZNIÓW (zu-classes) ===
+ * -------------------------------------------------------- */
+
+.zu-classes {
+  background-color: var(--color-bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+  padding: 2rem;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* --- Nagłówek sekcji --- */
+.zu-classes h2.section-title {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(88, 166, 255, 0.25);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* --- Siatka klas --- */
+.zu-classes .osoby-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+}
+
+/* --- Karta klasy --- */
+.zu-classes .osoba-card-link {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.25s ease;
+}
+
+.zu-classes .osoba-card-link:hover {
+  transform: translateY(-4px);
+}
+
+.zu-classes .osoba-card {
+  background: var(--gradient-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.4rem 1.6rem;
+  box-shadow: var(--shadow-dark);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+.zu-classes .osoba-card:hover {
+  border-color: var(--color-accent);
+  background: var(--color-bg-alt);
+  box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+}
+
+/* --- Nagłówek karty --- */
+.zu-classes .osoba-card h4 {
+  color: var(--color-accent);
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.1rem;
+}
+
+/* --- Lista uczniów --- */
+.zu-classes .osoba-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.zu-classes .osoba-list li {
+  padding: 6px 0;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.25s ease;
+}
+
+.zu-classes .osoba-list li i {
+  color: var(--color-accent);
+}
+
+.zu-classes .osoba-list li:hover {
+  color: var(--text-main);
+}
+
+/* --- Responsywność --- */
+@media (max-width: 1024px) {
+  .zu-classes .osoby-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .zu-classes {
+    padding: 1.2rem;
+  }
+
+  .zu-classes h2.section-title {
+    font-size: 1.5rem;
+  }
+
+  .zu-classes .osoby-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .zu-classes .osoba-card {
+    padding: 1rem 1.2rem;
+  }
+
+  .zu-classes .osoba-list li {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .zu-classes .osoby-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------------------------------------
+ * === STRONA PLANU LEKCJI (zu-timetable)
+ * -------------------------------------------------------- */
+
+.zu-timetable {
+  background-color: var(--color-bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+  padding: 2rem;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* --- Przycisk powrotu --- */
+.zu-timetable .btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 500;
+  margin-bottom: 1.2rem;
+  transition: color 0.25s ease;
+}
+
+.zu-timetable .btn-back i {
+  font-size: 1.2rem;
+}
+
+.zu-timetable .btn-back:hover {
+  color: var(--color-accent-hover);
+}
+
+/* --- Tytuł strony --- */
+.zu-timetable h2.section-title {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(88, 166, 255, 0.25);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* --- Sekcje dni --- */
+.zu-timetable .day-section {
+  margin-bottom: 2rem;
+  background: var(--gradient-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-dark);
+  overflow: hidden;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.zu-timetable .day-section h3 {
+  background: var(--color-bg-alt);
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin: 0;
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid var(--color-border-light);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.zu-timetable .day-section h3 i {
+  font-size: 1.2rem;
+}
+
+/* --- Tabela planu --- */
+.zu-timetable .plan-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-bg-card);
+  color: var(--text-main);
+  transition: background 0.3s, color 0.3s;
+}
+
+.zu-timetable .plan-table th,
+.zu-timetable .plan-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.zu-timetable .plan-table th {
+  background: var(--color-bg-alt);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.zu-timetable .plan-table td {
+  color: var(--text-secondary);
+}
+
+.zu-timetable .plan-table tr:hover td {
+  background: rgba(88, 166, 255, 0.05);
+}
+
+/* --- Naprzemienne tła wierszy --- */
+.zu-timetable .plan-table tbody tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* --- Zastępstwa / status --- */
+.zu-timetable .table-sub td {
+  background: rgba(46, 160, 67, 0.05);
+}
+.zu-timetable .table-sub:hover td {
+  background: rgba(46, 160, 67, 0.1);
+}
+
+.zu-timetable .table-merge td {
+  background: rgba(88, 166, 255, 0.05);
+}
+.zu-timetable .table-merge:hover td {
+  background: rgba(88, 166, 255, 0.1);
+}
+
+.zu-timetable .table-cancel td {
+  background: rgba(248, 81, 73, 0.05);
+}
+.zu-timetable .table-cancel:hover td {
+  background: rgba(248, 81, 73, 0.1);
+}
+
+/* --- Brak danych --- */
+.zu-timetable .no-data {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: var(--shadow-dark);
+  margin-top: 2rem;
+  transition: background 0.3s, color 0.3s;
+}
+
+.zu-timetable .no-data h3 {
+  color: var(--color-accent);
+}
+
+/* --- Responsywność --- */
+@media (max-width: 1024px) {
+  .zu-timetable .day-section h3 {
+    font-size: 1rem;
+    padding: 0.8rem 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .zu-timetable {
+    padding: 1.2rem;
+  }
+
+  .zu-timetable h2.section-title {
+    font-size: 1.5rem;
+  }
+
+  .zu-timetable .plan-table th,
+  .zu-timetable .plan-table td {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+  }
+}
+/* --------------------------------------------------------
+ * === STRONA NAUCZYCIELI (zu-teachers)
+ * -------------------------------------------------------- */
+
+.zu-teachers {
+  background-color: var(--color-bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+  padding: 2rem;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* --- Tytuł strony --- */
+.zu-teachers h2.section-title {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(88, 166, 255, 0.25);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* --- Siatka nauczycieli --- */
+.zu-teachers .osoby-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+}
+
+/* --- Karta nauczyciela --- */
+.zu-teachers .osoba-card {
+  background: var(--gradient-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.4rem 1.6rem;
+  box-shadow: var(--shadow-dark);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+
+.zu-teachers .osoba-card:hover {
+  border-color: var(--color-accent);
+  background: var(--color-bg-alt);
+  transform: translateY(-3px);
+  box-shadow: 0 0 10px rgba(88, 166, 255, 0.25);
+}
+
+/* --- Nagłówek karty --- */
+.zu-teachers .osoba-card h4 {
+  color: var(--color-accent);
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.1rem;
+}
+
+/* --- Lista informacji --- */
+.zu-teachers .osoba-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.zu-teachers .osoba-list li {
+  padding: 6px 0;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.25s ease;
+}
+
+.zu-teachers .osoba-list li i {
+  color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.zu-teachers .osoba-list li:hover {
+  color: var(--text-main);
+}
+
+/* --- Status obecności --- */
+.zu-teachers .osoba-list .status {
+  border-bottom: none;
+  margin-top: 0.4rem;
+  padding-top: 0.6rem;
+}
+
+.zu-teachers .status-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.9rem;
+  border: 1px solid transparent;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+/* --- Kolory statusów --- */
+.zu-teachers .status-label.yes {
+  color: var(--color-success);
+  background: rgba(46, 160, 67, 0.1);
+  border-color: rgba(46, 160, 67, 0.3);
+}
+
+.zu-teachers .status-label.no {
+  color: var(--color-danger);
+  background: rgba(248, 81, 73, 0.1);
+  border-color: rgba(248, 81, 73, 0.3);
+}
+
+.zu-teachers .status-label.null {
+  color: var(--text-muted);
+  background: rgba(183, 190, 202, 0.1);
+  border-color: rgba(183, 190, 202, 0.3);
+}
+
+/* --- Responsywność --- */
+@media (max-width: 1200px) {
+  .zu-teachers .osoby-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .zu-teachers .osoby-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .zu-teachers {
+    padding: 1.2rem;
+  }
+
+  .zu-teachers h2.section-title {
+    font-size: 1.5rem;
+  }
+
+  .zu-teachers .osoby-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .zu-teachers .osoba-card {
+    padding: 1rem 1.2rem;
+  }
+
+  .zu-teachers .osoba-list li {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .zu-teachers .osoby-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --------------------------------------------------------
+ * === USTAWIENIA (zu-settings) ===
+ * -------------------------------------------------------- */
+.zu-settings {
+  background-color: var(--color-bg-dark);
+  color: var(--color-text, #e6edf3);
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+  padding: 2rem;
+}
+
+.zu-settings .settings-panel {
+  background: var(--color-bg-card);
+  border: 1px solid #2a2f35;
+  border-radius: 12px;
+  padding: 2rem 2.2rem;
+  box-shadow: var(--shadow-dark);
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.zu-settings h2.section-title {
+  color: var(--color-accent);
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(88, 166, 255, 0.3);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.zu-settings .settings-group {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #2a2f35;
+  padding-bottom: 1.2rem;
+}
+
+.zu-settings .settings-group h4 {
+  color: var(--color-accent);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.zu-settings .setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+}
+
+/* --- Pola wyboru --- */
+.zu-settings select.form-select {
+  background: var(--color-bg-card);
+  color: #e6edf3;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  width: 180px;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.zu-settings select.form-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.25);
+}
+
+/* --- Przełączniki (checkbox form-switch) --- */
+.zu-settings .form-check-input {
+  width: 2.5rem;
+  height: 1.3rem;
+  background-color: #1f252e;
+  border: 1px solid #3a3f45;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+}
+
+.zu-settings .form-check-input:checked {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 6px rgba(88, 166, 255, 0.6);
+}
+
+.zu-settings .form-check-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3);
+}
+
+/* --- Przycisk zapisu --- */
+.zu-settings .btn-save {
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.zu-settings .btn-save:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-2px);
+}
+
+/* --- Alert (po zapisaniu) --- */
+.zu-settings .alert-box {
+  background: rgba(46, 160, 67, 0.15);
+  border: 1px solid rgba(46, 160, 67, 0.4);
+  color: #2ea043;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 0 6px rgba(46, 160, 67, 0.3);
+}
+
+/* --- Jasny tryb --- */
+[data-theme="light"] .zu-settings {
+  background: #f8f9fa;
+  color: #212529;
+}
+
+[data-theme="light"] .zu-settings .settings-panel {
+  background: #ffffff;
+  border-color: #dee2e6;
+  box-shadow: var(--shadow-light);
+}
+
+[data-theme="light"] .zu-settings select.form-select {
+  background: #fff;
+  color: #212529;
+  border-color: #ced4da;
+}
+
+[data-theme="light"] .zu-settings .form-check-input {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+[data-theme="light"] .zu-settings .form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  box-shadow: 0 0 6px rgba(13, 110, 253, 0.4);
+}
+
+/* --------------------------------------------------------
+ * === STOPKA (FOOTER-NAWIGACJA) ===
+ * -------------------------------------------------------- */
+
+.footer-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background: var(--gradient-footer);
+  border-top: 1px solid var(--color-border-light);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--text-muted);
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px);
+  z-index: 1040;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.footer-nav .container-fluid {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+  padding: 0 1rem;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* --- Linki nawigacji --- */
+.footer-nav a {
+  color: var(--text-muted);
+  text-decoration: none;
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.25s ease;
+  font-size: 0.85rem;
+}
+
+.footer-nav a i {
+  font-size: 1.4rem;
+  margin-bottom: 2px;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.footer-nav a:hover {
+  color: var(--color-accent);
+  transform: translateY(-3px);
+}
+
+.footer-nav a.active {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(88, 166, 255, 0.4);
+}

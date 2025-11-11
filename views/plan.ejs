@@ -1,0 +1,131 @@
+<%- include("partials/head", { title: title }) %>
+<%- include("partials/header") %>
+
+<div class="zu-timetable">
+  <main>
+    <!-- === Przycisk powrotu === -->
+    <a href="/klasy" class="btn-back">
+      <i class="bi bi-arrow-left-circle"></i> Powrót do klas
+    </a>
+
+    <!-- === Tytuł strony === -->
+    <h2 class="section-title">
+      <i class="bi bi-calendar-week"></i> Plan lekcji — <%= nazwa %>
+    </h2>
+
+    <% if (plan) { %>
+      <% 
+        // Ikony przypisane do dni tygodnia
+        const ikonyDni = {
+          poniedzialek: "bi-brightness-high",
+          wtorek: "bi-cloud-sun",
+          sroda: "bi-cloud",
+          czwartek: "bi-sunrise",
+          piatek: "bi-stars"
+        };
+      %>
+
+      <% Object.keys(plan).forEach(dzien => { %>
+        <section class="day-section">
+          <h3>
+            <i class="bi <%= ikonyDni[dzien] || 'bi-sun' %>"></i>
+            <%= dzien.charAt(0).toUpperCase() + dzien.slice(1) %>
+          </h3>
+
+          <table class="plan-table">
+            <thead>
+              <tr>
+                <th>Godzina</th>
+                <th>Przedmiot</th>
+                <th>Sala</th>
+                <th>Nauczyciel</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% plan[dzien].forEach(lekcja => { %>
+                <% 
+                  let rowClass = "";
+                  if (lekcja.zastepstwo) {
+                    switch (lekcja.zastepstwo.status) {
+                      case "łączenie": rowClass = "table-merge"; break;
+                      case "odwołane": rowClass = "table-cancel"; break;
+                      default: rowClass = "table-sub"; break;
+                    }
+                  }
+                %>
+                <tr class="<%= rowClass %>">
+                  <td><%= lekcja.godzina %></td>
+
+                  <td>
+                    <strong><%= lekcja.przedmiot %></strong>
+                    <% if (lekcja.zastepstwo) { %>
+                      <div class="zastepstwo-info mt-1">
+                        <% if (lekcja.zastepstwo.nauczyciel_zastepujacy) { %>
+                          <i class="bi bi-arrow-right-short text-info"></i>
+                          <%= lekcja.zastepstwo.nauczyciel_nieobecny %> →
+                          <span class="text-info"><%= lekcja.zastepstwo.nauczyciel_zastepujacy %></span>
+                        <% } else { %>
+                          <span class="text-danger"><i class="bi bi-x-circle"></i> Odwołane zajęcia</span>
+                        <% } %>
+                        <% if (lekcja.zastepstwo.opis) { %>
+                          <% 
+                            // próba automatycznego wyciągnięcia klasy, z którą połączono (np. "1B")
+                            const matchKlasa = lekcja.zastepstwo.opis.match(/klas[ay]\s+([0-9]+[A-Z])/i);
+                            const klasaPolaczona = matchKlasa ? matchKlasa[1] : null;
+                          %>
+
+                          <div class="text-secondary small">
+                            <% if (lekcja.zastepstwo.status === "łączenie" && klasaPolaczona) { %>
+                              <i class="bi bi-people text-info"></i>
+                              Połączono z klasą <strong class="text-info"><%= klasaPolaczona %></strong>
+                              (<%= lekcja.zastepstwo.opis.split("(")[1]?.replace(")", "") || lekcja.zastepstwo.opis %>)
+                            <% } else { %>
+                              <%= lekcja.zastepstwo.opis %>
+                            <% } %>
+                          </div>
+                        <% } %>
+                      </div>
+                    <% } %>
+                  </td>
+
+                  <td><%= lekcja.sala || "—" %></td>
+
+                  <td>
+                    <% if (lekcja.zastepstwo) { %>
+                      <%= lekcja.zastepstwo.nauczyciel_zastepujacy || lekcja.zastepstwo.nauczyciel_nieobecny %>
+                    <% } else { %>
+                      <%= lekcja.nauczyciel %>
+                    <% } %>
+                  </td>
+
+                  <td>
+                    <% if (lekcja.zastepstwo) { %>
+                      <% if (lekcja.zastepstwo.status === "łączenie") { %>
+                        <span class="badge bg-info text-dark"><i class="bi bi-shuffle"></i> Łączenie</span>
+                      <% } else if (lekcja.zastepstwo.status === "odwołane") { %>
+                        <span class="badge bg-danger"><i class="bi bi-x-lg"></i> Odwołane</span>
+                      <% } else { %>
+                        <span class="badge bg-success"><i class="bi bi-person-check"></i> Zastępstwo</span>
+                      <% } %>
+                    <% } else { %>
+                      <span class="badge bg-secondary">Planowe</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </section>
+      <% }) %>
+    <% } else { %>
+      <div class="no-data text-center py-5">
+        <i class="bi bi-calendar-x" style="font-size:3rem;color:#58a6ff;"></i>
+        <h3 class="mt-3 text-info">Brak planu lekcji</h3>
+        <p class="text-secondary">Plan lekcji dla klasy <%= nazwa %> nie jest jeszcze dostępny.</p>
+      </div>
+    <% } %>
+  </main>
+</div>
+
+<%- include("partials/footer", { active: active }) %>

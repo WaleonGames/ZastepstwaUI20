@@ -1,0 +1,130 @@
+<%- include("partials/head", { title: "⚙️ Ustawienia" }) %>
+<%- include("partials/header") %>
+
+<div class="zu-settings">
+  <main>
+    <h2 class="section-title">
+      <i class="bi bi-gear-fill"></i> Ustawienia systemu
+    </h2>
+
+    <form id="settingsForm" method="POST" action="/ustawienia" class="settings-panel">
+      <!-- === Powiadomienie o zapisaniu === -->
+      <div id="saveAlert" class="alert-box" style="display:none;">
+        <i class="bi bi-check-circle-fill"></i> Zmiany zostały zapisane pomyślnie.
+      </div>
+
+      <!-- === Sekcja: Wygląd === -->
+      <div class="settings-group">
+        <h4><i class="bi bi-palette-fill"></i> Wygląd</h4>
+
+        <div class="setting-item">
+          <label for="theme">Motyw aplikacji</label>
+          <select id="theme" name="theme" class="form-select">
+            <option value="dark" <%= theme === 'dark' ? 'selected' : '' %>>Ciemny</option>
+            <option value="light" <%= theme === 'light' ? 'selected' : '' %>>Jasny</option>
+            <option value="auto" <%= theme === 'auto' ? 'selected' : '' %>>Automatyczny</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- === Sekcja: Użytkownik === -->
+      <div class="settings-group">
+        <h4><i class="bi bi-person-circle"></i> Użytkownik</h4>
+
+        <div class="setting-item">
+          <label for="language">Język interfejsu</label>
+          <select id="language" name="language" class="form-select">
+            <option value="pl" <%= user.lang === 'pl' ? 'selected' : '' %>>Polski</option>
+            <option value="en" <%= user.lang === 'en' ? 'selected' : '' %> disabled>English</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- === Sekcja: System === -->
+      <div class="settings-group">
+        <h4><i class="bi bi-tools"></i> System</h4>
+
+        <div class="setting-item form-switch">
+          <label for="notifications">Powiadomienia systemowe</label>
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="notifications"
+            name="notifications"
+            <%= notifications ? "checked" : "" %>
+            disabled
+          />
+        </div>
+
+        <div class="setting-item form-switch">
+          <label for="autoupdate">Automatyczne aktualizacje</label>
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="autoupdate"
+            name="autoupdate"
+            <%= autoupdate ? "checked" : "" %>
+            disabled
+          />
+        </div>
+      </div>
+
+      <!-- === Przycisk zapisu === -->
+      <div class="text-center mt-4">
+        <button type="submit" class="btn-save">
+          <i class="bi bi-save2"></i> Zapisz zmiany
+        </button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script>
+  // === Automatyczny zapis ustawień przez AJAX ===
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("settingsForm");
+    const alertBox = document.getElementById("saveAlert");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      const data = {};
+      formData.forEach((value, key) => {
+        data[key] = value === "on" ? true : value;
+      });
+
+      // Dodaj stan checkboxów ręcznie, bo nie wysyłają się, gdy są odznaczone
+      data.notifications = document.getElementById("notifications").checked;
+      data.autoupdate = document.getElementById("autoupdate").checked;
+
+      try {
+        const res = await fetch("/ustawienia", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        if (res.ok) {
+          alertBox.style.display = "block";
+          alertBox.classList.add("fade-in");
+
+          // Odśwież motyw dynamicznie bez reloadu
+          if (data.theme) {
+            document.documentElement.setAttribute("data-theme", data.theme);
+          }
+
+          setTimeout(() => {
+            alertBox.style.display = "none";
+          }, 2500);
+        } else {
+          console.error("Błąd zapisu ustawień:", res.status);
+        }
+      } catch (err) {
+        console.error("❌ Błąd:", err);
+      }
+    });
+  });
+</script>
+
+<%- include("partials/footer", { active: "settings" }) %>

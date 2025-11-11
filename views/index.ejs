@@ -1,0 +1,81 @@
+<%- include("partials/head", { title: title }) %>
+<%- include("partials/header") %>
+
+<div class="zu-index">
+  <div class="container-fluid py-4">
+    <div class="row g-3">
+
+      <!-- === LEWY PANEL: WYDARZENIA === -->
+      <div class="col-12 col-lg-3">
+        <div class="card border-secondary shadow-sm h-100">
+          <div class="card-header text-info fw-semibold">
+            <i class="bi bi-calendar-event"></i> Wydarzenia szkolne
+          </div>
+          <ul class="list-group list-group-flush">
+            <% wydarzenia.forEach(e => { %>
+              <li class="list-group-item border-secondary">
+                <strong class="text-info"><%= e.data %></strong><br>
+                <%= e.tytul %>
+              </li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+
+      <!-- === ŚRODEK: PANEL GŁÓWNY === -->
+      <div class="col-12 col-lg-6 text-center">
+        <h2 class="fw-bold text-info mb-4">
+          <i class="bi bi-mortarboard-fill"></i> Panel Publicznego Ucznia
+        </h2>
+
+        <div class="row g-4 justify-content-center">
+          <div class="col-12 col-sm-6 col-lg-4">
+            <a href="/zastepstwa" class="text-decoration-none">
+              <div class="card border-secondary shadow-sm p-4 h-100 hover-card">
+                <i class="bi bi-calendar-week text-info fs-2 mb-2"></i>
+                <h5 class="fw-semibold">Zastępstwa</h5>
+                <p class="text-secondary small">Sprawdź, kto zastępuje nieobecnych nauczycieli</p>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-12 col-sm-6 col-lg-4">
+            <a href="/nauczyciele" class="text-decoration-none">
+              <div class="card border-secondary shadow-sm p-4 h-100 hover-card">
+                <i class="bi bi-person-lines-fill text-info fs-2 mb-2"></i>
+                <h5 class="fw-semibold">Nauczyciele</h5>
+                <p class="text-secondary small">Lista wszystkich nauczycieli i ich przedmiotów</p>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-12 col-sm-6 col-lg-4">
+            <a href="/klasy" class="text-decoration-none">
+              <div class="card border-secondary shadow-sm p-4 h-100 hover-card">
+                <i class="bi bi-people-fill text-info fs-2 mb-2"></i>
+                <h5 class="fw-semibold">Klasy</h5>
+                <p class="text-secondary small">Zobacz skład każdej klasy i plany lekcji</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- === PRAWY PANEL: STATYSTYKA NAUCZYCIELI === -->
+      <div class="col-12 col-lg-3">
+        <div class="card border-secondary shadow-sm h-100">
+          <div class="card-header text-info fw-semibold">
+            <i class="bi bi-bar-chart-line"></i> Statystyka nauczycieli
+          </div>
+          <div class="card-body">
+            <p class="mb-1"><strong>Nieobecnych:</strong> <%= statystyka.liczbaNieobecnych %></p>
+            <p class="mb-0"><strong>Dominujący powód:</strong> <%= statystyka.dominujacyPowod %></p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<%- include("partials/footer", { active: active }) %>

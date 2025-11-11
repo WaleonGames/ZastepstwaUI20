@@ -1,0 +1,180 @@
+<%- include("partials/head", { title: "🧠 Terminal Zastępstw" }) %>
+
+<div class="zu-terminal">
+  <div class="terminal-header">
+    <div class="title">
+      <i class="bi bi-terminal"></i> Terminal Zastępstw
+    </div>
+    <a href="/logout-terminal" class="btn-exit">
+      <i class="bi bi-door-closed"></i> Wyloguj
+    </a>
+  </div>
+
+  <div id="terminalOutput" class="terminal-output">
+    <div class="line system">[System] Sesja terminala została uruchomiona...</div>
+    <div class="line system">[Uwaga] Dostęp administracyjny aktywny.</div>
+    <div class="line system">Wpisz <b>help</b>, aby zobaczyć dostępne komendy.</div>
+  </div>
+
+  <form id="terminalForm" class="terminal-input-line">
+    <span class="prompt">admin@zastepstwa:</span>
+    <input
+      type="text"
+      id="terminalInput"
+      autocomplete="off"
+      placeholder="Wpisz polecenie (np. help)"
+    />
+  </form>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("terminalForm");
+    const input = document.getElementById("terminalInput");
+    const output = document.getElementById("terminalOutput");
+
+    const appendLine = (text, cls = "output") => {
+      const div = document.createElement("div");
+      div.className = "line " + cls;
+      div.textContent = text;
+      output.appendChild(div);
+      output.scrollTop = output.scrollHeight;
+    };
+
+    appendLine("[OK] Terminal gotowy do pracy.", "system");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const cmd = input.value.trim();
+      if (!cmd) return;
+
+      appendLine("admin@zastepstwa> " + cmd, "command");
+      input.value = "";
+
+      try {
+        // === Wysyłanie komendy do backendu ===
+        const res = await fetch("/api/terminal", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command: cmd })
+        });
+
+        const data = await res.json();
+
+        if (data.output) {
+          if (data.output.includes("__clear__")) {
+            output.innerHTML = "";
+          } else if (data.output.includes("__exit__")) {
+            window.location.href = "/logout-terminal";
+          } else {
+            data.output.forEach(line => appendLine(line, data.type || "output"));
+          }
+        } else {
+          appendLine("⚠️ Błąd: Brak odpowiedzi z serwera.", "error");
+        }
+      } catch (err) {
+        appendLine("❌ Błąd połączenia z serwerem: " + err.message, "error");
+      }
+    });
+
+    // Skrót klawiszowy: Ctrl + L = clear terminal
+    document.addEventListener("keydown", (e) => {
+      if (e.ctrlKey && e.key.toLowerCase() === "l") {
+        e.preventDefault();
+        output.innerHTML = "";
+        appendLine("[System] Ekran wyczyszczony (Ctrl + L)", "system");
+      }
+    });
+  });
+</script>
+
+<style>
+  .zu-terminal {
+    background-color: #0d1117;
+    color: #e6edf3;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: "Consolas", monospace;
+  }
+
+  .terminal-header {
+    background: #161b22;
+    border-bottom: 1px solid #222;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--color-accent);
+  }
+
+  .terminal-header .title {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-exit {
+    color: #f85149;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.2s;
+  }
+
+  .btn-exit:hover {
+    color: #ff7070;
+  }
+
+  .terminal-output {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem 1.5rem;
+    line-height: 1.45;
+    background: #0d1117;
+  }
+
+  .terminal-input-line {
+    border-top: 1px solid #1f242b;
+    background: #161b22;
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 1rem;
+  }
+
+  .terminal-input-line .prompt {
+    color: var(--color-accent);
+    margin-right: 0.5rem;
+  }
+
+  .terminal-input-line input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #e6edf3;
+    font-family: "Consolas", monospace;
+    font-size: 0.95rem;
+  }
+
+  .line {
+    margin: 2px 0;
+    word-break: break-word;
+  }
+
+  .line.system {
+    color: #79b8ff;
+  }
+
+  .line.command {
+    color: #2ea043;
+  }
+
+  .line.error {
+    color: #f85149;
+  }
+
+  .line.output {
+    color: #e6edf3;
+  }
+</style>

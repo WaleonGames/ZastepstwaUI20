@@ -1,0 +1,38 @@
+<%- include("partials/head", { title: title }) %>
+<%- include("partials/header") %>
+
+<div class="zu-teachers">
+  <main>
+    <h2 class="section-title"><i class="bi bi-mortarboard-fill"></i> Nauczyciele</h2>
+
+    <div class="osoby-grid">
+      <% nauczyciele.forEach(n => { %>
+        <div class="osoba-card">
+          <h4>
+            <i class="bi bi-person-vcard"></i> <%= n.tytul %>. <%= n.imie %>
+          </h4>
+
+          <ul class="osoba-list">
+            <li><i class="bi bi-journal-text"></i> <%= n.przedmiot %></li>
+
+            <% if (n.sala) { %>
+              <li><i class="bi bi-door-open"></i> Sala: <%= n.sala %></li>
+            <% } %>
+            
+            <li class="status">
+              <% if (n.obecnosc === "yes") { %>
+                <span class="status-label yes"><i class="bi bi-check-circle-fill"></i> Obecny</span>
+              <% } else if (n.obecnosc === "no") { %>
+                <span class="status-label no"><i class="bi bi-x-circle-fill"></i> Nieobecny</span>
+              <% } else { %>
+                <span class="status-label null"><i class="bi bi-hourglass-split"></i> Brak danych</span>
+              <% } %>
+            </li>
+          </ul>
+        </div>
+      <% }) %>
+    </div>
+  </main>
+</div>
+
+<%- include("partials/footer", { active: active }) %>
