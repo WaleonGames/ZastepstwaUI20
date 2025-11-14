@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# 🧑‍🏫 Generator zastępstw v5 — faktyczna nieobecność nauczycieli (z dniami i powodem)
+# 🧑‍🏫 Generator zastępstw v7 — faktyczne nieobecności z nauczyciele.json
 # Autor: Kacper
 
-import json, os, random, re
+import json, os, re
 
 DATA_DIR = "data"
 PLANY_DIR = os.path.join(DATA_DIR, "plany")
@@ -10,6 +10,7 @@ OUTPUT_PATH = os.path.join(DATA_DIR, "zastepstwa.json")
 
 DNI = ["poniedzialek", "wtorek", "sroda", "czwartek", "piatek"]
 
+# === FUNKCJE ===
 def load_json(path):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
@@ -23,6 +24,7 @@ def extract_rocznik(klasa):
     match = re.match(r"(\d+)", klasa)
     return match.group(1) if match else None
 
+# === GŁÓWNA FUNKCJA ===
 def main():
     nauczyciele = load_json(os.path.join(DATA_DIR, "nauczyciele.json"))
     klasy = [f[:-5] for f in os.listdir(PLANY_DIR) if f.endswith(".json")]
@@ -30,28 +32,28 @@ def main():
 
     zastepstwa = {d: [] for d in DNI}
 
-    nauczyciele_obecni = [n for n in nauczyciele if n["obecnosc"] == "yes"]
+    # 🧾 lista faktycznie nieobecnych z pliku nauczyciele.json
+    nieobecni = [n for n in nauczyciele if n["obecnosc"] == "no"]
+    obecni = [n for n in nauczyciele if n["obecnosc"] == "yes"]
 
-    print("🔍 Generowanie zastępstw (v5 – faktyczna nieobecność)...")
+    if not nieobecni:
+        print("ℹ️ Brak nieobecności — wszyscy nauczyciele obecni.")
+        save_json(OUTPUT_PATH, {d: [] for d in DNI})
+        return
 
-    for n in nauczyciele:
-        if n["obecnosc"] != "no":
-            continue
+    print(f"🔍 Generowanie zastępstw (v7 — {len(nieobecni)} faktycznych nieobecnych)...")
 
+    for n in nieobecni:
         imie = n["imie"]
         przedmiot = n["przedmiot"]
         powod = n.get("powod", "brak informacji")
-        dni_nieob = n.get("dni_nieobecnosci", random.randint(1, 3))
-        dni_nieobecne = random.sample(DNI, min(dni_nieob, len(DNI)))
 
-        print(f"🚫 {imie} — nieobecny {dni_nieob} dni ({', '.join(dni_nieobecne)}), powód: {powod}")
+        print(f"\n🚫 {imie} — nieobecny ({powod})")
 
-        # dla każdego dnia nieobecności generujemy zastępstwa
-        for dzien in dni_nieobecne:
-            for klasa, plan in plany.items():
-                if dzien not in plan:
-                    continue
-                for lekcja in plan[dzien]:
+        # przejrzyj wszystkie klasy i dni
+        for klasa, plan in plany.items():
+            for dzien, lekcje in plan.items():
+                for lekcja in lekcje:
                     if lekcja["nauczyciel"] != imie:
                         continue
 
@@ -77,26 +79,21 @@ def main():
                         if polaczone_z:
                             break
 
-                    # === 2️⃣ Wolny nauczyciel (jeśli brak połączenia) ===
+                    # === 2️⃣ Zastępstwo — wolny nauczyciel ===
                     if not polaczone_z:
                         wolni = []
-                        for kandydat in nauczyciele_obecni:
-                            zajety = False
-                            for p in plany.values():
-                                for lekcje_dnia in p.values():
-                                    for l in lekcje_dnia:
-                                        if l["nauczyciel"] == kandydat["imie"] and l["godzina"] == godzina:
-                                            zajety = True
-                                            break
-                                    if zajety:
-                                        break
-                                if zajety:
-                                    break
-                            if not zajety:
+                        for kandydat in obecni:
+                            zajety = any(
+                                l["nauczyciel"] == kandydat["imie"] and l["godzina"] == godzina
+                                for p in plany.values()
+                                for lekcje_dnia in p.values()
+                                for l in lekcje_dnia
+                            )
+                            if not zajety and kandydat["imie"] != imie:
                                 wolni.append(kandydat)
 
                         if wolni:
-                            wybrany = random.choice(wolni)
+                            wybrany = wolni[0]  # pierwszy wolny zamiast random
                             status = "zastępstwo"
                             nauczyciel_zast = wybrany["imie"]
                             opis = f"Zastępuje {wybrany['imie']} ({wybrany['przedmiot']}) — {powod}"
@@ -112,18 +109,19 @@ def main():
                     })
 
     save_json(OUTPUT_PATH, zastepstwa)
-    print(f"\n✅ Zapisano: {OUTPUT_PATH}")
 
     total = sum(len(zastepstwa[d]) for d in DNI)
-    if total:
-        stat = {"łączenie": 0, "zastępstwo": 0, "odwołane": 0}
-        for dzien in DNI:
-            for z in zastepstwa[dzien]:
-                stat[z["status"]] += 1
-        print(f"📊 Łącznie: {total} — łączeń: {stat['łączenie']}, zastępstw: {stat['zastępstwo']}, odwołanych: {stat['odwołane']}")
+    if total == 0:
+        print("\nℹ️ Brak lekcji nieobecnych nauczycieli w planach.")
     else:
-        print("ℹ️ Brak zastępstw — wszyscy obecni.")
+        stat = {"łączenie": 0, "zastępstwo": 0, "odwołane": 0}
+        for d in DNI:
+            for z in zastepstwa[d]:
+                stat[z["status"]] += 1
 
+        print(f"\n✅ Zapisano: {OUTPUT_PATH}")
+        print(f"📊 Łącznie: {total} — łączeń: {stat['łączenie']}, zastępstw: {stat['zastępstwo']}, odwołanych: {stat['odwołane']}")
 
+# === START ===
 if __name__ == "__main__":
     main()

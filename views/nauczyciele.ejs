@@ -3,7 +3,9 @@
 
 <div class="zu-teachers">
   <main>
-    <h2 class="section-title"><i class="bi bi-mortarboard-fill"></i> Nauczyciele</h2>
+    <h2 class="section-title">
+      <i class="bi bi-mortarboard-fill"></i> Nauczyciele i specjaliści
+    </h2>
 
     <div class="osoby-grid">
       <% nauczyciele.forEach(n => { %>
@@ -15,10 +17,38 @@
           <ul class="osoba-list">
             <li><i class="bi bi-journal-text"></i> <%= n.przedmiot %></li>
 
-            <% if (n.sala) { %>
+            <% if (n.sala && n.sala !== "-") { %>
               <li><i class="bi bi-door-open"></i> Sala: <%= n.sala %></li>
             <% } %>
-            
+
+            <% if (n.specjalizacja) { %>
+              <li><i class="bi bi-lightbulb"></i> Specjalizacja: <%= n.specjalizacja %></li>
+            <% } %>
+
+            <% if (n.klasy && n.klasy.length) { %>
+              <li><i class="bi bi-people"></i> Klasy: <%= n.klasy.join(", ") %></li>
+            <% } %>
+
+            <% if (typeof n.etap !== "undefined") { %>
+              <li>
+                <i class="bi bi-clock-history"></i>
+                Etap:
+                <% if (n.etap === 0) { %>
+                  <span class="badge bg-secondary">Cały dzień (0)</span>
+                <% } else if (n.etap === 1) { %>
+                  <span class="badge bg-info text-dark">Szkolny (1)</span>
+                <% } else if (n.etap === 2) { %>
+                  <span class="badge bg-success">Poranny (2)</span>
+                <% } else if (n.etap === 3) { %>
+                  <span class="badge bg-warning text-dark">Popołudniowy (3)</span>
+                <% } %>
+              </li>
+            <% } %>
+
+            <% if (n.powod) { %>
+              <li><i class="bi bi-info-circle"></i> Powód: <%= n.powod %></li>
+            <% } %>
+
             <li class="status">
               <% if (n.obecnosc === "yes") { %>
                 <span class="status-label yes"><i class="bi bi-check-circle-fill"></i> Obecny</span>

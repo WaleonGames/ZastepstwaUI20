@@ -1,140 +1,178 @@
 #!/usr/bin/env python3
-# 🎓 Generator planów lekcji v8 — stały nauczyciel + realistyczne rozłożenie godzin + obecnosc
+# 🎓 Generator planów lekcji v13 — dynamiczny + etapy + limity dzienne
 # Autor: Kacper
 
-import json, os, random
+import os, json, random, datetime
 
-# === STAŁE ===
 DATA_DIR = "data"
 PLANY_DIR = os.path.join(DATA_DIR, "plany")
-DNI = ["poniedzialek", "wtorek", "sroda", "czwartek", "piatek"]
-GODZINY = [
-    "8:00 - 8:45",
-    "8:55 - 9:40",
-    "9:50 - 10:35",
-    "10:45 - 11:30",
-    "11:40 - 12:25",
-    "12:35 - 13:20"
-]
 
-# === FUNKCJE POMOCNICZE ===
-def load_json(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+# === FUNKCJE ===
+def load_all_json(directory):
+    """Wczytuje wszystkie pliki .json z katalogu data"""
+    data = {}
+    for file in os.listdir(directory):
+        if file.endswith(".json"):
+            name = os.path.splitext(file)[0]
+            path = os.path.join(directory, file)
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data[name] = json.load(f)
+            except Exception as e:
+                print(f"❌ Błąd podczas wczytywania {file}: {e}")
+    return data
 
-def save_json(path, data):
+def save_json(path, content):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+        json.dump(content, f, indent=2, ensure_ascii=False)
 
-# === PRZYPISYWANIE NAUCZYCIELI DO KLAS ===
-def assign_teachers_to_classes(klasy, nauczyciele, przedmioty):
-    """Każda klasa ma przypisanego jednego obecnego nauczyciela dla danego przedmiotu."""
+def to_minutes(t):
+    return int(t.split(":")[0]) * 60 + int(t.split(":")[1])
+
+def time_in_range(time_str, start="8:00", end="16:00"):
+    """Sprawdza, czy godzina mieści się w zakresie 8:00–16:00"""
+    t1, t2 = map(to_minutes, time_str.replace(" ", "").split("-"))
+    s, e = to_minutes(start), to_minutes(end)
+    return s <= t1 < e and s < t2 <= e
+
+def parse_hour_range(text):
+    """Zwraca listę godzin (np. '8:00-12:00') → (480, 720)"""
+    try:
+        s, e = text.replace(" ", "").split("-")
+        return to_minutes(s), to_minutes(e)
+    except:
+        return 0, 1440
+
+def class_etap(klasa, etapy):
+    """Zwraca etap dla danej klasy"""
+    for eid, info in etapy.items():
+        if klasa in info.get("klasy", []):
+            return int(eid)
+    return 1
+
+def preferowane_godziny(przedmiot):
+    """Zwraca zakres godzin preferowanych"""
+    zakresy = przedmiot.get("preferowane_godziny", [])
+    if not zakresy:
+        return [("8:00", "16:00")]
+    return [tuple(z.split("-")) for z in zakresy]
+
+# === PRZYPISYWANIE NAUCZYCIELI ===
+def assign_teachers_to_classes(klasy, nauczyciele, przedmioty, etapy):
     subject_teachers = {}
-
-    # grupowanie nauczycieli wg przedmiotów i obecności
     for n in nauczyciele:
         if n.get("obecnosc") == "no":
-            continue  # pomijamy nieobecnych
+            continue
         subject_teachers.setdefault(n["przedmiot"], []).append(n)
 
     class_teacher_map = {}
     for klasa in klasy:
         class_teacher_map[klasa] = {}
+        etap_klasy = class_etap(klasa, etapy)
+
         for subject, info in przedmioty.items():
             if klasa not in info["klasy"]:
                 continue
-
-            nauczyciele_lista = subject_teachers.get(subject, [])
+            etapy_ok = info.get("etapy", [1, 2, 3])
+            nauczyciele_lista = [
+                n for n in subject_teachers.get(subject, [])
+                if n.get("etap") in etapy_ok or n.get("etap") in (etap_klasy, 0, 1)
+            ]
             if not nauczyciele_lista:
-                print(f"⚠️ Brak dostępnych nauczycieli dla przedmiotu {subject} w klasie {klasa}")
+                print(f"⚠️ Brak nauczyciela {subject} dla klasy {klasa} (etap {etap_klasy})")
                 continue
-
             chosen = random.choice(nauczyciele_lista)
             class_teacher_map[klasa][subject] = chosen
-
     return class_teacher_map
 
-# === GENERATOR PLANU DLA KLASY ===
-def generate_plan_for_class(klasa, class_teachers, przedmioty, all_busy=None):
-    if all_busy is None:
-        all_busy = {n["imie"]: {d: [] for d in DNI} for n in sum(
-            [list(v.values()) for v in class_teachers.values()], []
-        )}
-
-    plan = {d: [] for d in DNI}
+# === GENERATOR PLANU ===
+def generate_plan(klasa, class_teachers, przedmioty, dni, godziny):
+    plan = {d: [] for d in dni}
     subjects = list(class_teachers[klasa].keys())
 
-    # lista lekcji w tygodniu (na podstawie liczby godzin)
-    weekly_subjects = []
+    # Tworzymy listę wszystkich lekcji
+    weekly = []
     for subj in subjects:
-        hours = przedmioty[subj]["godziny"]
-        weekly_subjects.extend([subj] * hours)
-    random.shuffle(weekly_subjects)
+        hours = przedmioty[subj].get("godziny", 1)
+        weekly += [subj] * hours
+    random.shuffle(weekly)
 
-    # rozdzielamy lekcje równomiernie na dni
-    day_count = len(DNI)
-    for dzien in DNI:
-        daily_lessons = min(5, max(3, len(weekly_subjects) // day_count))
-        chosen_subjects = weekly_subjects[:daily_lessons]
-        weekly_subjects = weekly_subjects[daily_lessons:]
+    godziny = [g for g in godziny if time_in_range(g, "8:00", "16:00")]
 
-        # wybieramy godziny ciągiem
-        start_index = random.randint(0, max(0, len(GODZINY) - daily_lessons))
-        godziny_dnia = GODZINY[start_index:start_index + daily_lessons]
+    # licznik lekcji per subject per day
+    subject_daily_count = {d: {} for d in dni}
 
-        for i, subject in enumerate(chosen_subjects):
+    for dzien in dni:
+        if not weekly:
+            break
+
+        # maks 5 lekcji dziennie
+        daily_limit = min(len(godziny), 5)
+        slots = random.sample(godziny, daily_limit)
+        slots.sort(key=lambda h: godziny.index(h))
+
+        for g in slots:
+            if not weekly:
+                break
+
+            subject = weekly[0]
+            max_daily = przedmioty[subject].get("lekcje_dziennie", 1)
+            if subject_daily_count[dzien].get(subject, 0) >= max_daily:
+                # jeśli osiągnięto dzienny limit — szukamy innego przedmiotu
+                alt = next((s for s in weekly if subject_daily_count[dzien].get(s, 0) < przedmioty[s].get("lekcje_dziennie", 1)), None)
+                if not alt:
+                    continue
+                subject = alt
+
+            weekly.remove(subject)
             nauczyciel = class_teachers[klasa].get(subject)
             if not nauczyciel:
-                continue  # brak przypisanego nauczyciela
-            godzina = godziny_dnia[i]
-
-            # sprawdzenie kolizji
-            if godzina in all_busy[nauczyciel["imie"]][dzien]:
                 continue
 
-            all_busy[nauczyciel["imie"]][dzien].append(godzina)
+            subject_daily_count[dzien][subject] = subject_daily_count[dzien].get(subject, 0) + 1
+
             plan[dzien].append({
-                "godzina": godzina,
+                "godzina": g,
                 "przedmiot": subject,
-                "sala": nauczyciel["sala"],
+                "sala": nauczyciel.get("sala", "?"),
                 "nauczyciel": nauczyciel["imie"]
             })
 
-        plan[dzien].sort(key=lambda x: GODZINY.index(x["godzina"]))
+        plan[dzien].sort(key=lambda x: godziny.index(x["godzina"]))
 
-    return plan, all_busy
+    return plan
 
 # === GŁÓWNA FUNKCJA ===
 def main():
-    klasy_path = os.path.join(DATA_DIR, "klasy.json")
-    nauczyciele_path = os.path.join(DATA_DIR, "nauczyciele.json")
-    przedmioty_path = os.path.join(DATA_DIR, "przedmioty.json")
+    data = load_all_json(DATA_DIR)
+    szkola = data.get("szkola", {})
+    klasy = data.get("klasy", {})
+    nauczyciele = data.get("nauczyciele", [])
+    przedmioty = data.get("przedmioty", {})
+    etapy = data.get("etapy", {})
+    zastepstwa = data.get("zastepstwa", {})
 
-    if not (os.path.exists(klasy_path) and os.path.exists(nauczyciele_path) and os.path.exists(przedmioty_path)):
-        print("❌ Brak jednego z plików: klasy.json / nauczyciele.json / przedmioty.json")
-        return
+    dni = list(zastepstwa.keys()) if zastepstwa else ["poniedzialek", "wtorek", "sroda", "czwartek", "piatek"]
+    godziny = szkola.get("godziny_szkolne", [])
 
-    klasy = load_json(klasy_path)
-    nauczyciele = load_json(nauczyciele_path)
-    przedmioty = load_json(przedmioty_path)
+    godziny = [g for g in godziny if time_in_range(g, "8:00", "16:00")]
+    if not godziny:
+        godziny = ["8:00-8:45", "8:55-9:40", "9:50-10:35", "10:45-11:30", "11:40-12:25", "12:35-13:20"]
 
-    print("📚 Generowanie planów lekcji z uwzględnieniem obecności nauczycieli...")
+    print(f"🏫 Szkoła: {szkola.get('nazwa', 'Nieznana')} ({szkola.get('rok_szkolny', '-')})")
+    print(f"🕗 Zakres godzin: 8:00–16:00")
+    print(f"📘 Ładowanie danych: {len(przedmioty)} przedmiotów, {len(nauczyciele)} nauczycieli")
 
-    # przypisanie nauczycieli
-    class_teachers = assign_teachers_to_classes(klasy, nauczyciele, przedmioty)
+    class_teachers = assign_teachers_to_classes(klasy, nauczyciele, przedmioty, etapy)
 
-    # globalna kontrola zajętości nauczycieli
-    all_busy = {n["imie"]: {d: [] for d in DNI} for n in nauczyciele}
-
-    # generowanie planów
     for klasa in klasy.keys():
-        plan, all_busy = generate_plan_for_class(klasa, class_teachers, przedmioty, all_busy=all_busy)
-        output_path = os.path.join(PLANY_DIR, f"{klasa.upper()}.json")
-        save_json(output_path, plan)
-        print(f"✅ {klasa.upper()} — zapisano plan ({len(plan)} dni)")
+        plan = generate_plan(klasa, class_teachers, przedmioty, dni, godziny)
+        out_path = os.path.join(PLANY_DIR, f"{klasa}.json")
+        save_json(out_path, plan)
+        print(f"✅ Wygenerowano plan: {klasa} ({len(plan)} dni)")
 
-    print("\n🎓 Wszystkie plany wygenerowane pomyślnie (tylko obecni nauczyciele)!")
+    print("\n🎓 Wszystkie plany wygenerowane (uwzględniono limity dzienne i etapy).")
 
 # === START ===
 if __name__ == "__main__":
