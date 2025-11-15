@@ -198,9 +198,6 @@ body {
 /* --------------------------------------------------------
  * === STRONA ZASTĘPSTW (zu-substitutions) ===
  * -------------------------------------------------------- */
-/* --------------------------------------------------------
- * === STRONA ZASTĘPSTW (zu-substitutions)
- * -------------------------------------------------------- */
 
 .zu-substitutions {
   background-color: var(--color-bg-main);
@@ -370,37 +367,117 @@ body {
   background: rgba(248, 81, 73, 0.1);
 }
 
-/* === WIDOK GRUPOWANY (klasa/nauczyciel) === */
+/* === WIDOK GRUPOWANY (nagłówek klasy/nauczyciela) === */
 .zu-substitutions .log-day {
   font-weight: 600;
   color: var(--color-accent);
   margin-top: 2rem;
-  margin-bottom: 0.6rem;
+  margin-bottom: .8rem;
   border-bottom: 1px solid var(--color-border);
-  padding-bottom: 0.25rem;
+  padding-bottom: .25rem;
 }
 
+
+/* === Pudełko logów === */
 .zu-substitutions .log-box {
   background: var(--color-bg-card);
-  color: var(--text-secondary);
   padding: 1rem 1.4rem;
   border-radius: 10px;
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 1.5rem;
+
   font-family: "Consolas", monospace;
-  line-height: 1.45;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  line-height: 1.48;
+
   box-shadow: var(--shadow-dark);
   transition: background 0.3s, color 0.3s;
 }
 
-.zu-substitutions .log-box strong {
+
+/* === POJEDYNCZY WPIS === */
+.log-entry {
+  padding: .55rem 0 .65rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+
+/* 🕒 GODZINA === */
+.log-time {
+  font-weight: 700;
+  color: #58a6ff;
+  margin-bottom: .35rem;
+  font-size: 1rem;
+}
+
+
+/* === META: Przedmiot + Sala === */
+.log-meta {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.log-meta strong {
   color: var(--color-accent);
 }
 
-.zu-substitutions .log-box .text-info {
-  color: var(--color-accent-hover) !important;
+
+/* === NAUCZYCIELE === */
+.log-teachers {
+  margin-top: .4rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.log-teachers strong {
+  color: var(--color-accent-hover);
+}
+
+
+/* === STATUS (badge + opis) === */
+.log-status {
+  margin-top: .55rem;
+  font-size: 0.9rem;
+}
+
+
+/* — Badges — */
+.log-status .badge {
+  padding: .35rem .5rem;
+  font-size: .78rem;
+  border-radius: 6px;
+}
+
+
+/* — Opis statusu — */
+.log-status .text-secondary {
+  margin-top: .3rem;
+  display: block;
+}
+
+
+/* === Kolory ikon w opisach === */
+.log-desc .bi-link-45deg,
+.log-desc .bi-arrow-repeat,
+.log-desc .bi-x-circle {
+  margin-right: .25rem;
+}
+
+.log-desc .text-primary {
+  color: var(--color-accent) !important;
+}
+
+.log-desc .text-warning {
+  color: #ffae42 !important;
+}
+
+.log-desc .text-danger {
+  color: #ff4d4d !important;
 }
 
 /* === BRAK DANYCH === */

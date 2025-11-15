@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-# 🧑‍🏫 Generator zastępstw v7 — faktyczne nieobecności z nauczyciele.json
-# Autor: Kacper
+# 🧑‍🏫 Generator zastępstw v13 — zgodny z 3 zasadami:
+# 1) Łączenie klas — tylko jeśli druga klasa ma lekcję i nauczyciel jest obecny
+# 2) Zastępstwo — jeśli nie można połączyć
+# 3) Odwołane — jeśli nie można połączyć i brak wolnych nauczycieli
 
 import json, os, re
 
@@ -10,8 +12,13 @@ OUTPUT_PATH = os.path.join(DATA_DIR, "zastepstwa.json")
 
 DNI = ["poniedzialek", "wtorek", "sroda", "czwartek", "piatek"]
 
-# === FUNKCJE ===
+# ============================================================
+# FUNKCJE
+# ============================================================
+
 def load_json(path):
+    if not os.path.exists(path):
+        return {}
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -21,107 +28,166 @@ def save_json(path, data):
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 def extract_rocznik(klasa):
-    match = re.match(r"(\d+)", klasa)
-    return match.group(1) if match else None
+    m = re.match(r"(\d+)", klasa)
+    return int(m.group(1)) if m else None
 
-# === GŁÓWNA FUNKCJA ===
+
+# ============================================================
+# GŁÓWNY PROGRAM
+# ============================================================
+
 def main():
+
     nauczyciele = load_json(os.path.join(DATA_DIR, "nauczyciele.json"))
+    if not isinstance(nauczyciele, list):
+        nauczyciele = []
+
+    # wszystkie plany klas
     klasy = [f[:-5] for f in os.listdir(PLANY_DIR) if f.endswith(".json")]
-    plany = {k: load_json(os.path.join(PLANY_DIR, f"{k}.json")) for k in klasy}
+    plany = {
+        k: load_json(os.path.join(PLANY_DIR, f"{k}.json"))
+        for k in klasy
+    }
 
     zastepstwa = {d: [] for d in DNI}
 
-    # 🧾 lista faktycznie nieobecnych z pliku nauczyciele.json
-    nieobecni = [n for n in nauczyciele if n["obecnosc"] == "no"]
-    obecni = [n for n in nauczyciele if n["obecnosc"] == "yes"]
+    nieobecni = [n for n in nauczyciele if n.get("obecnosc") == "no"]
+    obecni = [n for n in nauczyciele if n.get("obecnosc") == "yes"]
 
-    if not nieobecni:
-        print("ℹ️ Brak nieobecności — wszyscy nauczyciele obecni.")
-        save_json(OUTPUT_PATH, {d: [] for d in DNI})
-        return
+    print(f"🔍 Nieobecni nauczyciele: {len(nieobecni)}")
 
-    print(f"🔍 Generowanie zastępstw (v7 — {len(nieobecni)} faktycznych nieobecnych)...")
-
+    # ------------------------------------------------------------
+    # DLA KAŻDEGO NIEOBECNEGO
+    # ------------------------------------------------------------
     for n in nieobecni:
+
         imie = n["imie"]
-        przedmiot = n["przedmiot"]
         powod = n.get("powod", "brak informacji")
 
-        print(f"\n🚫 {imie} — nieobecny ({powod})")
+        print(f"\n🚫 {imie} — nieobecny")
 
-        # przejrzyj wszystkie klasy i dni
         for klasa, plan in plany.items():
+
             for dzien, lekcje in plan.items():
+
                 for lekcja in lekcje:
-                    if lekcja["nauczyciel"] != imie:
+
+                    if lekcja.get("nauczyciel") != imie:
                         continue
 
                     godzina = lekcja["godzina"]
-                    rocznik = extract_rocznik(klasa)
+                    przedmiot = lekcja["przedmiot"]
+
                     status = "odwołane"
                     nauczyciel_zast = None
-                    opis = f"Zajęcia odwołane ({powod})"
+                    opis = "Zajęcia odwołane"
 
-                    # === 1️⃣ Łączenie klas tego samego rocznika ===
+                    # =====================================================
+                    # 1) PRÓBA ŁĄCZENIA KLAS
+                    # =====================================================
+
                     polaczone_z = None
-                    for inna_klasa, plan_inny in plany.items():
+
+                    for inna_klasa, plan2 in plany.items():
+
                         if inna_klasa == klasa:
                             continue
-                        if extract_rocznik(inna_klasa) == rocznik:
-                            for lekcja_inna in plan_inny.get(dzien, []):
-                                if lekcja_inna["godzina"] == godzina:
-                                    polaczone_z = inna_klasa
-                                    status = "łączenie"
-                                    nauczyciel_zast = lekcja_inna["nauczyciel"]
-                                    opis = f"Połączono klasy {klasa} i {inna_klasa} ({powod})"
-                                    break
-                        if polaczone_z:
-                            break
 
-                    # === 2️⃣ Zastępstwo — wolny nauczyciel ===
+                        # znajdź lekcję o tej samej godzinie
+                        lekcja2 = next(
+                            (l2 for l2 in plan2.get(dzien, []) if l2.get("godzina") == godzina),
+                            None
+                        )
+
+                        if not lekcja2:
+                            continue  # okienko
+                        if not lekcja2.get("przedmiot"):
+                            continue
+                        if not lekcja2.get("nauczyciel"):
+                            continue
+
+                        nauc2 = lekcja2["nauczyciel"]
+
+                        # nauczyciel MUSI być obecny
+                        nauc2_obj = next((x for x in nauczyciele if x["imie"] == nauc2), None)
+                        if not nauc2_obj:
+                            continue
+                        if nauc2_obj.get("obecnosc") == "no":
+                            continue
+
+                        # różnica poziomów max 1
+                        r1 = extract_rocznik(klasa)
+                        r2 = extract_rocznik(inna_klasa)
+                        if r1 is not None and r2 is not None:
+                            if abs(r1 - r2) > 1:
+                                continue
+
+                        # Mamy łączenie
+                        polaczone_z = inna_klasa
+                        nauczyciel_zast = nauc2
+                        status = "łączenie"
+                        opis = f"Połączono klasy {klasa} i {inna_klasa}"
+                        break
+
+                    # =====================================================
+                    # 2) PRÓBA ZASTĘPSTWA
+                    # =====================================================
+
                     if not polaczone_z:
                         wolni = []
+
                         for kandydat in obecni:
-                            zajety = any(
-                                l["nauczyciel"] == kandydat["imie"] and l["godzina"] == godzina
-                                for p in plany.values()
-                                for lekcje_dnia in p.values()
-                                for l in lekcje_dnia
-                            )
-                            if not zajety and kandydat["imie"] != imie:
+
+                            # sprawdzamy czy kandydat ma lekcję w tej godzinie
+                            zajety = False
+                            for p in plany.values():
+                                for ld in p.get(dzien, []):
+                                    if ld.get("nauczyciel") == kandydat["imie"] and ld["godzina"] == godzina:
+                                        zajety = True
+                                        break
+                                if zajety:
+                                    break
+
+                            if not zajety:
                                 wolni.append(kandydat)
 
                         if wolni:
-                            wybrany = wolni[0]  # pierwszy wolny zamiast random
-                            status = "zastępstwo"
+                            wybrany = wolni[0]
                             nauczyciel_zast = wybrany["imie"]
-                            opis = f"Zastępuje {wybrany['imie']} ({wybrany['przedmiot']}) — {powod}"
+                            status = "zastępstwo"
+                            opis = f"Zastępuje {wybrany['imie']}"
+
+                    # =====================================================
+                    # 3) OSTATECZNIE: ODWOŁANE
+                    # =====================================================
+
+                    if not polaczone_z and not nauczyciel_zast:
+                        status = "odwołane"
+                        opis = "Zajęcia odwołane"
+
+                    # =====================================================
+                    # ZAPIS
+                    # =====================================================
 
                     zastepstwa[dzien].append({
                         "godzina": godzina,
                         "klasa": klasa,
-                        "przedmiot": lekcja["przedmiot"],
+                        "przedmiot": przedmiot,
                         "nauczyciel_nieobecny": imie,
                         "nauczyciel_zastepujacy": nauczyciel_zast,
                         "status": status,
                         "opis": opis
                     })
 
+    # ZAPIS
     save_json(OUTPUT_PATH, zastepstwa)
 
     total = sum(len(zastepstwa[d]) for d in DNI)
-    if total == 0:
-        print("\nℹ️ Brak lekcji nieobecnych nauczycieli w planach.")
-    else:
-        stat = {"łączenie": 0, "zastępstwo": 0, "odwołane": 0}
-        for d in DNI:
-            for z in zastepstwa[d]:
-                stat[z["status"]] += 1
+    print(f"\n📊 Wygenerowano łącznie: {total} pozycji zastępstw.")
 
-        print(f"\n✅ Zapisano: {OUTPUT_PATH}")
-        print(f"📊 Łącznie: {total} — łączeń: {stat['łączenie']}, zastępstw: {stat['zastępstwo']}, odwołanych: {stat['odwołane']}")
 
-# === START ===
+# ============================================================
+# START
+# ============================================================
 if __name__ == "__main__":
     main()

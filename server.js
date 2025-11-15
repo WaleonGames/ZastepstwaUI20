@@ -248,15 +248,16 @@ app.get("/klasy", (req, res) => {
 
 // === Plan lekcji dla klasy (z uwzględnieniem wszystkich zastępstw) ===
 app.get("/klasy/:nazwa", (req, res) => {
-  const nazwa = req.params.nazwa.toUpperCase(); // np. 1A
+  const nazwa = req.params.nazwa.toUpperCase();
   const planPath = path.join("plany", `${nazwa}.json`);
+
   const plan = loadJSON(planPath);
   const zastepstwaAll = loadJSON("zastepstwa.json");
 
-  // Połącz wszystkie dni z zastepstwa.json w jedną listę
+  // Zbierz wszystkie zastępstwa
   const wszystkieZastepstwa = Object.values(zastepstwaAll).flat();
 
-  // Dopasuj tylko te, które dotyczą danej klasy (bezpośrednio lub w opisie)
+  // Filtruj te dla klasy
   const zastepstwa = wszystkieZastepstwa.filter(z => {
     const klasaZ = (z.klasa || "").toUpperCase();
     const opisZ = (z.opis || "").toUpperCase();
@@ -272,10 +273,15 @@ app.get("/klasy/:nazwa", (req, res) => {
   if (plan && Object.keys(plan).length) {
     Object.keys(plan).forEach(day => {
       plan[day].forEach(lekcja => {
-        const match = zastepstwa.find(z =>
-          z.godzina.trim() === lekcja.godzina.trim() &&
-          z.przedmiot.trim().toLowerCase() === lekcja.przedmiot.trim().toLowerCase()
-        );
+
+        const godzLekcji = (lekcja.godzina || "").trim();
+        const przedLekcji = (lekcja.przedmiot || "").trim().toLowerCase();
+
+        const match = zastepstwa.find(z => {
+          const godzZ = (z.godzina || "").trim();
+          const przedZ = (z.przedmiot || "").trim().toLowerCase();
+          return godzZ === godzLekcji && przedZ === przedLekcji;
+        });
 
         if (match) {
           lekcja.zastepstwo = {

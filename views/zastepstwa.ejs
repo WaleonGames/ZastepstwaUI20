@@ -46,11 +46,76 @@
           <%= tryb === 'class' ? 'Klasa: ' : 'Nauczyciel: ' %><%= key %>
         </h5>
         <div class="log-box">
-        <% grouped[key].forEach(z => { %>
-            <div>[<%= z.godzina %>] <strong><%= z.przedmiot %></strong> 
-              — <%= z.klasa %> — <%= z.nauczyciel_nieobecny %> 
-              → <span class="text-info"><%= z.nauczyciel_zastepujacy || '—' %></span>
+          <% grouped[key].forEach(z => { %>
+
+            <div class="log-entry mb-3">
+
+              <!-- GODZINA -->
+              <div class="log-time fw-bold">
+                🕒 <%= z.godzina %>
+              </div>
+
+              <!-- PRZEDMIOT + SALA -->
+              <div class="log-meta text-secondary mt-1">
+                <% if (z.przedmiot) { %>
+                  <div>📘 <strong><%= z.przedmiot %></strong></div>
+                <% } %>
+
+                <% if (z.sala) { %>
+                  <div>🏫 Sala: <%= z.sala %></div>
+                <% } %>
+              </div>
+
+              <!-- NAUCZYCIELE -->
+              <div class="log-teachers mt-1">
+                👩‍🏫 Nieobecny: <strong><%= z.nauczyciel_nieobecny %></strong><br>
+
+                <% if (z.nauczyciel_zastepujacy) { %>
+                  🔄 Zastępuje: <span class="text-info"><%= z.nauczyciel_zastepujacy %></span><br>
+                <% } else { %>
+                  🔄 Zastępuje: — <br>
+                <% } %>
+              </div>
+
+              <!-- STATUS -->
+              <div class="log-status mt-1">
+                <% if (z.status === "łączenie") { %>
+                  <span class="badge bg-primary">
+                    <i class="bi bi-link-45deg"></i> Łączenie
+                  </span>
+
+                  <% if (z.polaczone_z) { %>
+                    <div class="text-secondary mt-1">
+                      🔗 Klasa łączona: <strong><%= z.polaczone_z %></strong>
+                    </div>
+                  <% } %>
+
+                  <div class="text-secondary mt-1">
+                    <%= z.opis %>
+                  </div>
+
+                <% } else if (z.status === "zastępstwo") { %>
+                  <span class="badge bg-warning text-dark">
+                    <i class="bi bi-arrow-repeat"></i> Zastępstwo
+                  </span>
+
+                  <div class="text-secondary mt-1">
+                    <%= z.opis %>
+                  </div>
+
+                <% } else { %>
+                  <span class="badge bg-danger">
+                    <i class="bi bi-x-circle"></i> Odwołane
+                  </span>
+
+                  <div class="text-secondary mt-1">
+                    <%= z.opis %>
+                  </div>
+                <% } %>
+              </div>
+
             </div>
+
           <% }) %>
         </div>
       <% }) %>
