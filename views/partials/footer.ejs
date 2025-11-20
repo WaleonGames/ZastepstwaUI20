@@ -1,27 +1,66 @@
-<footer class="footer-nav border-top border-dark shadow-lg">
-  <div class="container-fluid d-flex justify-content-around align-items-center py-2">
-    <a href="/" class="nav-item <%= active === 'home' ? 'active' : '' %>">
-      <i class="bi bi-house"></i><span>Główna</span>
-    </a>
+<footer class="footer-nav border-top shadow-lg">
+  <div class="footer-container">
 
-    <a href="/zastepstwa" class="nav-item <%= active === 'zastepstwa' ? 'active' : '' %>">
-      <i class="bi bi-calendar-week"></i><span>Zastępstwa</span>
-    </a>
+    <div class="footer-left">
+      <a href="/" class="dock-icon <%= active === 'home' ? 'active' : '' %>"><i class="bi bi-house"></i></a>
+      <a href="/zastepstwa" class="dock-icon <%= active === 'zastepstwa' ? 'active' : '' %>"><i class="bi bi-calendar-week"></i></a>
+      <a href="/klasy" class="dock-icon <%= active === 'klasy' ? 'active' : '' %>"><i class="bi bi-people"></i></a>
+      <a href="/nauczyciele" class="dock-icon <%= active === 'nauczyciele' ? 'active' : '' %>"><i class="bi bi-person-video2"></i></a>
+      <a href="/ustawienia" class="dock-icon <%= active === 'ustawienia' ? 'active' : '' %>"><i class="bi bi-gear"></i></a>
+    </div>
 
-    <a href="/klasy" class="nav-item <%= active === 'klasy' ? 'active' : '' %>">
-      <i class="bi bi-people"></i><span>Klasy</span>
-    </a>
+    <div class="footer-right" id="openCalendar">
+      <div id="footer-time" class="time"></div>
+      <div id="footer-date" class="date"></div>
+    </div>
 
-    <a href="/nauczyciele" class="nav-item <%= active === 'nauczyciele' ? 'active' : '' %>">
-      <i class="bi bi-person-video2"></i><span>Nauczyciele</span>
-    </a>
-
-    <a href="/ustawienia" class="nav-item <%= active === 'ustawienia' ? 'active' : '' %>">
-      <i class="bi bi-gear"></i><span>Ustawienia</span>
-    </a>
   </div>
 </footer>
 
-<script src="/js/hotkeys.js"></script>
-</body>
-</html>
+<%
+const now = calendar.now;
+const year = calendar.year;
+const month = calendar.month;
+const day = calendar.day;
+const weekday = calendar.weekday;
+
+const monthsPL = calendar.monthsPL;
+const daysPL = calendar.daysPL;
+
+const firstDay = new Date(year, month, 1);
+const lastDay = new Date(year, month + 1, 0);
+const monthDays = lastDay.getDate();
+
+const startWeekDay = firstDay.getDay();
+const adjustedStart = starteekDay === 0 ? 7 : startWeekDay;
+%>
+
+<div class="calendar-embed" id="calendarEmbed">
+
+  <div class="cal-top">
+    <div class="cal-dayname"><%= daysPL[weekday] %></div>
+    <div class="cal-full-date"><%= day %> <%= monthsPL[month] %> <%= year %></div>
+  </div>
+
+  <div class="cal-month-header">
+    <span><%= monthsPL[month] %> <%= year %></span>
+  </div>
+
+  <div class="cal-grid cal-weekdays">
+    <div>P</div><div>W</div><div>Ś</div><div>C</div><div>P</div><div>S</div><div>N</div>
+  </div>
+
+  <div class="cal-grid">
+    <% for(let i = 1; i < adjustedStart; i++) { %>
+      <div class="empty"></div>
+    <% } %>
+
+    <% for(let d = 1; d <= monthDays; d++) { %>
+      <div class="cal-day <%= d === day ? 'today' : '' %>"><%= d %></div>
+    <% } %>
+  </div>
+
+</div>
+
+
+<script src="/script.js"></script>

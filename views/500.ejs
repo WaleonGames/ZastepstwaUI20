@@ -1,0 +1,74 @@
+<%- include("partials/head") %>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+      <div class="card shadow-lg border-danger">
+        <div class="card-header bg-danger text-white text-center py-3">
+          <h3 class="mb-0">🚨 Błąd 500 — Wewnętrzny błąd serwera</h3>
+        </div>
+
+        <div class="card-body">
+
+          <p class="text-center">
+            Coś poszło nie tak po stronie serwera.  
+            Jeśli problem będzie się powtarzał — zgłoś go poniżej.
+          </p>
+
+          <div class="alert alert-secondary text-center">
+            📌 <strong>Kod błędu:</strong> <%= errorId %>
+          </div>
+
+          <h5 class="mt-4">Zgłoś problem</h5>
+          <form id="feedbackForm" class="mt-3">
+            <div class="mb-3">
+              <textarea
+                class="form-control"
+                id="feedbackText"
+                rows="4"
+                placeholder="Opisz, co robiłeś przed wystąpieniem błędu..."
+                required
+              ></textarea>
+            </div>
+
+            <button class="btn btn-primary w-100" type="submit">
+              Wyślij zgłoszenie
+            </button>
+          </form>
+
+          <p id="feedbackStatus" class="mt-3 text-success text-center"></p>
+
+          <div class="text-center mt-4">
+            <a href="/" class="btn btn-outline-secondary">
+              ← Powrót do strony głównej
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById("feedbackForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const msg = document.getElementById("feedbackText").value.trim();
+  if (!msg) return;
+
+  const resp = await fetch("/feedback", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      text: msg,
+      page: window.location.pathname
+    })
+  });
+
+  document.getElementById("feedbackStatus").textContent =
+    "✔️ Dziękujemy! Zgłoszenie zostało wysłane.";
+});
+</script>

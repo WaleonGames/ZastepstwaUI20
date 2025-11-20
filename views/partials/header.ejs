@@ -1,5 +1,5 @@
 <header class="navbar border-bottom border-secondary shadow-sm py-2 px-3 topbar">
-  <div class="container-fluid d-flex justify-content-between align-items-center">
+  <div class="container-fluid d-flex justify-content-between align-items-center">    
     <!-- Tytuł -->
     <div class="topbar-title d-flex align-items-center gap-2">
       <i class="bi bi-mortarboard text-info fs-4"></i>
@@ -7,3 +7,50 @@
     </div>
   </div>
 </header>
+
+<!-- 🔔 ALERT – Ogłoszenie nagłe -->
+<div id="urgent-alert" class="alert alert-warning alert-dismissible fade show urgent-alert shadow-sm" role="alert" style="display:none;">
+  <div class="urgent-alert-scroll">
+    <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+    <span id="urgent-alert-text">To jest przykładowe ogłoszenie nagłe.</span>
+  </div>
+
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<script>
+function showUrgentAlert(text, minutes = 60) {
+    const alertBox = document.getElementById("urgent-alert");
+    const alertText = document.getElementById("urgent-alert-text");
+
+    alertText.textContent = text;
+    alertBox.style.display = "block";
+
+    // zapis czasu wygaśnięcia
+    const expireTime = Date.now() + minutes * 60 * 1000;
+    localStorage.setItem("urgent_alert_text", text);
+    localStorage.setItem("urgent_alert_expire", expireTime);
+}
+
+// ŁADOWANIE po odświeżeniu strony
+window.addEventListener("DOMContentLoaded", () => {
+    const text = localStorage.getItem("urgent_alert_text");
+    const expire = parseInt(localStorage.getItem("urgent_alert_expire"));
+
+    if (text && expire > Date.now()) {
+        document.getElementById("urgent-alert-text").textContent = text;
+        document.getElementById("urgent-alert").style.display = "block";
+    } else {
+        localStorage.removeItem("urgent_alert_text");
+        localStorage.removeItem("urgent_alert_expire");
+    }
+});
+
+// Gdy zamknięto alert – usuń zapis
+document.addEventListener("close.bs.alert", () => {
+    localStorage.removeItem("urgent_alert_text");
+    localStorage.removeItem("urgent_alert_expire");
+});
+
+showUrgentAlert("Ewakuacja próbna za 5 minut!", 5);
+</script>

@@ -1,6 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const crypto = require("crypto");
-const cookieParser = require("cookie-parser")
+const cookieParser = require("cookie-parser");
+// --- Fetch dla Node.js ---
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
 const path = require("path");
 const fs = require("fs");
 const app = express();
@@ -13,8 +17,9 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use(express.json()); // ← obsługa JSON z fetch()
-app.use(express.urlencoded({ extended: true })); // ← obsługa zwykłych formularzy POST
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // cookie parser jako pierwszy middleware
 
 function generateAccessKey() {
   return crypto.randomBytes(75).toString("base64").slice(0, 100);
@@ -25,15 +30,15 @@ const SETTINGS_PATH = path.join(__dirname, "config", "settings.json");
 // === UNIWERSALNE WCZYTYWANIE JSON ===
 function loadJSON(filePath) {
   try {
-    const fullPath = path.join(__dirname, 'data', filePath);
-    const data = fs.readFileSync(fullPath, "utf8");
-    return JSON.parse(data);
+    const fullPath = path.join(__dirname, "data", filePath);
+    return JSON.parse(fs.readFileSync(fullPath, "utf8"));
   } catch (err) {
     console.warn(`⚠️ Nie udało się wczytać pliku ${filePath}:`, err.message);
     return {};
   }
 }
 
+// === SETTINGS FILE MANAGEMENT ===
 function ensureSettingsFile() {
   if (!fs.existsSync(SETTINGS_PATH)) {
     const defaults = {
@@ -44,20 +49,12 @@ function ensureSettingsFile() {
     };
     fs.mkdirSync(path.dirname(SETTINGS_PATH), { recursive: true });
     fs.writeFileSync(SETTINGS_PATH, JSON.stringify(defaults, null, 2));
-    console.log("🆕 Utworzono domyślny plik ustawień.");
     return defaults;
   }
 
   try {
-    const data = JSON.parse(fs.readFileSync(SETTINGS_PATH, "utf8"));
-    return {
-      theme: data.theme || "dark",
-      user: data.user || { lang: "pl" },
-      notifications: data.notifications ?? false,
-      autoupdate: data.autoupdate ?? false
-    };
+    return JSON.parse(fs.readFileSync(SETTINGS_PATH, "utf8"));
   } catch (err) {
-    console.error("⚠️ Błąd w pliku ustawień, przywrócono domyślne:", err);
     const defaults = {
       theme: "dark",
       user: { lang: "pl" },
@@ -71,80 +68,112 @@ function ensureSettingsFile() {
 
 function saveSettings(settings) {
   fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
-  console.log("💾 Zapisano ustawienia:", settings);
 }
 
-function requireTerminalAccess(req, res, next) {
-  if (req.hasTerminalAccess) return next();
+async function sendErrorToDiscord(errorMessage, req) {
+  try {
+    const webhook = process.env.DISCORD_WEBHOOK;
+    if (!webhook) {
+      console.warn("⚠️ Brak DISCORD_WEBHOOK w .env");
+      return;
+    }
 
-  return res.status(403).render("403", {
-    title: "Brak dostępu",
-    active: null,
-    message: "🔒 Ten tryb jest dostępny tylko lokalnie przez skrót klawiaturowy."
-  });
+    const payload = {
+      content: "🚨 **ZastepstwaUI21 – wykryto błąd 500!**",
+      embeds: [
+        {
+          title: "Błąd 500 – szczegóły",
+          color: 15158332,
+          description: "Wystąpił krytyczny błąd aplikacji backend."
+        },
+        {
+          title: "📌 Informacje o żądaniu",
+          color: 3447003,
+          fields: [
+            { name: "Route", value: "`" + req.originalUrl + "`" },
+            { name: "Metoda", value: "`" + req.method + "`" },
+            { name: "IP", value: "`" + req.ip + "`" },
+            { name: "User-Agent", value: "```" + (req.headers["user-agent"] || "brak") + "```" },
+            { name: "UUID", value: "`" + (req.cookies.school_uuid || "brak") + "`" }
+          ]
+        },
+        {
+          title: "🛑 Log błędu",
+          color: 15158332,
+          description: "```\n" + (errorMessage || "brak danych") + "\n```"
+        }
+      ]
+    };
+
+    const response = await fetch(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      console.error("❌ Discord webhook error:", await response.text());
+    } else {
+      console.log("📤 Błąd wysłany na Discord!");
+    }
+
+  } catch (err) {
+    console.error("❌ Nie udało się wysłać raportu na Discord:", err);
+  }
 }
 
-// === ROUTES ===
-
-// === Globalny middleware: motyw aplikacji ===
-app.use(cookieParser());
-
-// === Globalny middleware: motyw + ukryty terminal ===
+// =======================================================
+// ⭐ GLOBALNY MIDDLEWARE: school_uuid + motyw + kalendarz
+// =======================================================
 app.use((req, res, next) => {
+  // --- SCHOOL UUID ---
+  let uuid = req.cookies.school_uuid;
+
+  if (!uuid) {
+    uuid = crypto.randomUUID();
+    res.cookie("school_uuid", uuid, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: false,
+      maxAge: 365 * 24 * 60 * 60 * 1000
+    });
+    console.log("🆕 Utworzono school_uuid:", uuid);
+  } else {
+    console.log("🍪 Istniejący school_uuid:", uuid);
+  }
+
+  res.locals.school_uuid = uuid;
+
+  // --- SETTINGS ---
   const settings = ensureSettingsFile();
   res.locals.theme = settings.theme;
 
-  // --- Ustawienia dostępu do terminala ---
-  const terminalPath = "/terminal";
-  const adminPass = "SuperHaslo2025!"; // 🔐 Ustal swoje hasło administratora
-
-  if (req.path === terminalPath) {
-    const cookieKey = req.cookies.terminalKey;
-    const queryKey = req.query.key;
-
-    console.log("🧠 [TERMINAL CHECK]");
-    console.log("• IP:", req.ip);
-    console.log("• cookieKey:", cookieKey ? cookieKey.slice(0, 10) + "..." : "brak");
-    console.log("• queryKey:", queryKey ? "***" : "brak");
-
-    // === Warunek 1: poprawny cookie (100 znaków) ===
-    if (cookieKey && cookieKey.length === 100) {
-      console.log("✅ [TERMINAL ACCESS GRANTED via COOKIE]");
-      return res.render("terminal", {
-        title: "🧠 Terminal Zastępstw",
-        theme: settings.theme,
-      });
-    }
-
-    // === Warunek 2: wejście przez klucz administratora ===
-    if (queryKey && queryKey === adminPass) {
-      const newKey = crypto.randomBytes(75).toString("base64").slice(0, 100);
-      res.cookie("terminalKey", newKey, {
-        httpOnly: true,
-        sameSite: "strict",
-        maxAge: 60 * 60 * 1000, // 1h
-      });
-      console.log(`🔑 [TERMINAL ACCESS GRANTED via URL KEY] ${req.ip}`);
-      console.log(`→ Utworzono sesyjny klucz: ${newKey.slice(0, 10)}...`);
-      return res.render("terminal", {
-        title: "🧠 Terminal Zastępstw",
-        theme: settings.theme,
-      });
-    }
-
-    // === Brak dostępu ===
-    console.log("❌ [TERMINAL ACCESS DENIED]");
-    return res.status(403).render("403", {
-      title: "403 – Brak dostępu",
-      active: null,
-      message: "🔒 Dostęp tylko przez skrót (Windows + W) lub link z hasłem administratora.",
-    });
-  }
+  // --- KALENDARZ ---
+  const now = new Date();
+  res.locals.calendar = {
+    now,
+    year: now.getFullYear(),
+    month: now.getMonth(),
+    day: now.getDate(),
+    weekday: now.getDay(),
+    monthsPL: [
+      "Styczeń","Luty","Marzec","Kwiecień","Maj","Czerwiec",
+      "Lipiec","Sierpień","Wrzesień","Październik","Listopad","Grudzień"
+    ],
+    daysPL: [
+      "Niedziela","Poniedziałek","Wtorek","Środa",
+      "Czwartek","Piątek","Sobota"
+    ],
+  };
 
   next();
 });
 
-// === Strona główna ===
+// =======================================================
+// ROUTES
+// =======================================================
+
+// Strona główna
 app.get("/", (req, res) => {
   const nauczyciele = loadJSON("nauczyciele.json");
 
@@ -155,64 +184,57 @@ app.get("/", (req, res) => {
   });
 
   const dominujacyPowod =
-    Object.keys(powody).length > 0
+    Object.keys(powody).length
       ? Object.entries(powody).sort((a, b) => b[1] - a[1])[0][0]
       : "Brak";
-
-  const statystyka = {
-    liczbaNieobecnych: nieobecni.length,
-    dominujacyPowod
-  };
-
-  const wydarzenia = [
-    { data: "2025-11-10", tytul: "Akademia z okazji Święta Niepodległości" },
-    { data: "2025-11-15", tytul: "Konkurs matematyczny" },
-    { data: "2025-11-21", tytul: "Wywiadówki klas 3 i 4" },
-    { data: "2025-11-25", tytul: "Dzień sportu szkolnego" }
-  ];
 
   res.render("index", {
     title: "Panel Publicznego Ucznia",
     active: "home",
-    statystyka,
-    wydarzenia
+    statystyka: {
+      liczbaNieobecnych: nieobecni.length,
+      dominujacyPowod
+    },
+    wydarzenia: [
+      { data: "2025-11-10", tytul: "Akademia z okazji Święta Niepodległości" },
+      { data: "2025-11-15", tytul: "Konkurs matematyczny" },
+      { data: "2025-11-21", tytul: "Wywiadówki klas 3 i 4" },
+      { data: "2025-11-25", tytul: "Dzień sportu szkolnego" }
+    ]
   });
 });
 
-// Domyślny widok (bez dnia)
+// Domyślne redirect → poniedziałek
 app.get("/zastepstwa", (req, res) => {
   res.redirect("/zastepstwa/poniedzialek");
 });
 
-// Wg dnia
+// Zastępstwa wg dnia
 app.get("/zastepstwa/:dzien", (req, res) => {
   const plan = loadJSON("zastepstwa.json");
-  const dni = Object.keys(plan || {});
-  const dzien = req.params.dzien || "poniedzialek";
+  const dzien = req.params.dzien;
   const tryb = req.query.tryb || "class";
 
+  const dni = Object.keys(plan || {});
   let zastepstwa = plan[dzien] || [];
 
   let grouped = {};
 
-  // Grupowanie + sortowanie wg trybu
   if (tryb === "class") {
-    // Grupowanie po klasach
     zastepstwa.forEach(z => {
       const key = z.klasa || "Nieznana klasa";
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(z);
     });
 
-    // === Sortowanie po klasie (1A → 1B → 2A → 2B ...) ===
     const collator = new Intl.Collator("pl", { numeric: true, sensitivity: "base" });
+
     grouped = Object.fromEntries(
       Object.entries(grouped).sort(([a], [b]) => collator.compare(a, b))
     );
   }
 
-  else if (tryb === "teacher") {
-    // Grupowanie po nieobecnym nauczycielu (A→Z)
+  if (tryb === "teacher") {
     zastepstwa.forEach(z => {
       const key = z.nauczyciel_nieobecny || "Nieznany nauczyciel";
       if (!grouped[key]) grouped[key] = [];
@@ -235,10 +257,9 @@ app.get("/zastepstwa/:dzien", (req, res) => {
   });
 });
 
-// === Klasy ===
+// Klasy
 app.get("/klasy", (req, res) => {
   const klasy = loadJSON("klasy.json");
-
   res.render("klasy", {
     title: "🏫 Klasy i uczniowie",
     active: "klasy",
@@ -246,18 +267,13 @@ app.get("/klasy", (req, res) => {
   });
 });
 
-// === Plan lekcji dla klasy (z uwzględnieniem wszystkich zastępstw) ===
+// Plan klasy
 app.get("/klasy/:nazwa", (req, res) => {
   const nazwa = req.params.nazwa.toUpperCase();
-  const planPath = path.join("plany", `${nazwa}.json`);
-
-  const plan = loadJSON(planPath);
+  const plan = loadJSON(path.join("plany", `${nazwa}.json`));
   const zastepstwaAll = loadJSON("zastepstwa.json");
-
-  // Zbierz wszystkie zastępstwa
   const wszystkieZastepstwa = Object.values(zastepstwaAll).flat();
 
-  // Filtruj te dla klasy
   const zastepstwa = wszystkieZastepstwa.filter(z => {
     const klasaZ = (z.klasa || "").toUpperCase();
     const opisZ = (z.opis || "").toUpperCase();
@@ -269,28 +285,16 @@ app.get("/klasy/:nazwa", (req, res) => {
     );
   });
 
-  // Połącz plan z zastępstwami
   if (plan && Object.keys(plan).length) {
     Object.keys(plan).forEach(day => {
       plan[day].forEach(lekcja => {
+        const match = zastepstwa.find(z =>
+          (z.godzina || "").trim() === (lekcja.godzina || "").trim() &&
+          (z.przedmiot || "").trim().toLowerCase() === (lekcja.przedmiot || "").trim().toLowerCase()
+        );
 
-        const godzLekcji = (lekcja.godzina || "").trim();
-        const przedLekcji = (lekcja.przedmiot || "").trim().toLowerCase();
-
-        const match = zastepstwa.find(z => {
-          const godzZ = (z.godzina || "").trim();
-          const przedZ = (z.przedmiot || "").trim().toLowerCase();
-          return godzZ === godzLekcji && przedZ === przedLekcji;
-        });
-
-        if (match) {
-          lekcja.zastepstwo = {
-            status: match.status,
-            nauczyciel_nieobecny: match.nauczyciel_nieobecny,
-            nauczyciel_zastepujacy: match.nauczyciel_zastepujacy,
-            opis: match.opis
-          };
-        }
+        if (match)
+          lekcja.zastepstwo = { ...match };
       });
     });
   }
@@ -304,10 +308,9 @@ app.get("/klasy/:nazwa", (req, res) => {
   });
 });
 
-// === Nauczyciele ===
+// Nauczyciele
 app.get("/nauczyciele", (req, res) => {
   const nauczyciele = loadJSON("nauczyciele.json");
-
   res.render("nauczyciele", {
     title: "👩‍🏫 Nauczyciele",
     active: "nauczyciele",
@@ -315,70 +318,32 @@ app.get("/nauczyciele", (req, res) => {
   });
 });
 
-// === Strona ustawień ===
+// Ustawienia
 app.get("/ustawienia", (req, res) => {
   const settings = ensureSettingsFile();
 
   res.render("ustawienia", {
     title: "⚙️ Ustawienia",
     active: "ustawienia",
-    theme: settings.theme,
-    user: settings.user,
-    notifications: settings.notifications,
-    autoupdate: settings.autoupdate,
+    ...settings,
     saved: false
   });
 });
 
-// === Zapis ustawień ===
+// Zapis ustawień
 app.post("/ustawienia", (req, res) => {
   const settings = ensureSettingsFile();
 
-  // 🔹 Aktualizacja danych
   settings.theme = req.body.theme || "dark";
   settings.user.lang = req.body.language || "pl";
-  settings.notifications = req.body.notifications === "true" || req.body.notifications === true;
-  settings.autoupdate = req.body.autoupdate === "true" || req.body.autoupdate === true;
+  settings.notifications = req.body.notifications === "true";
+  settings.autoupdate = req.body.autoupdate === "true";
 
-  // 🔹 Zapis pliku
   saveSettings(settings);
-
   res.json({ success: true });
 });
 
-// === Aktywacja terminala (skrót Win + W) ===
-app.get("/activate-terminal", (req, res) => {
-  const newKey = crypto.randomBytes(75).toString("base64").slice(0, 100);
-  res.cookie("terminalKey", newKey, {
-    httpOnly: true,
-    sameSite: "strict",
-    maxAge: 60 * 60 * 1000,
-  });
-
-  console.log(`🔑 [TERMINAL ENABLED] IP=${req.ip} | KEY=${newKey.slice(0, 10)}...`);
-  res.redirect("/terminal");
-});
-
-// === Wylogowanie z terminala ===
-app.get("/logout-terminal", (req, res) => {
-  console.log(`👋 [TERMINAL] Wylogowano użytkownika IP=${req.ip}`);
-  res.clearCookie("terminalKey", { httpOnly: true, sameSite: "strict" });
-  res.redirect("/");
-});
-
-app.post("/api/terminal", async (req, res) => {
-  const key = req.cookies.terminalKey;
-  if (!key || key.length < 50)
-    return res.status(403).json({ success: false, output: ["Brak dostępu do terminala."] });
-
-  const cmd = req.body.command;
-  if (!cmd) return res.json({ success: false, output: ["Brak polecenia."] });
-
-  const result = await runCommand(cmd);
-  res.json(result);
-});
-
-// === Fallback 404 ===
+// Fallback 404
 app.use((req, res) => {
   res.status(404).render("404", {
     title: "Nie znaleziono strony",
@@ -386,7 +351,24 @@ app.use((req, res) => {
   });
 });
 
-// === Start serwera ===
+// =======================================================
+// 🛑 GLOBAL ERROR HANDLER (Błąd 500)
+// =======================================================
+app.use(async (err, req, res, next) => {
+  console.error("❌ Błąd aplikacji:", err);
+
+  // wysyłamy na Discord
+  await sendErrorToDiscord(err.stack || err.message, req);
+
+  res.status(500).render("500", {
+    title: "Błąd serwera",
+    active: null,
+    errorId: crypto.randomBytes(6).toString("hex"),
+    error500: true  // 🔥 nowa flaga wyłączająca header/footer
+  });
+});
+
+// Start serwera
 app.listen(PORT, () => {
-  console.log(`🚀 Serwer działa pod adresem: http://localhost:${PORT}`);
+  console.log(`🚀 Serwer działa: http://localhost:${PORT}`);
 });
