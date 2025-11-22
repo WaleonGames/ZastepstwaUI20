@@ -8,26 +8,32 @@
     </h2>
 
     <form id="settingsForm" method="POST" action="/ustawienia" class="settings-panel">
+      
       <!-- === Powiadomienie o zapisaniu === -->
       <div id="saveAlert" class="alert-box" style="display:none;">
         <i class="bi bi-check-circle-fill"></i> Zmiany zostały zapisane pomyślnie.
       </div>
 
-      <!-- === Sekcja: Wygląd === -->
+      <!-- =====================================================
+           🖌️ WYGLĄD
+      ====================================================== -->
       <div class="settings-group">
         <h4><i class="bi bi-palette-fill"></i> Wygląd</h4>
 
         <div class="setting-item">
           <label for="theme">Motyw aplikacji</label>
           <select id="theme" name="theme" class="form-select">
-            <option value="dark" <%= theme === 'dark' ? 'selected' : '' %>>Ciemny</option>
+            <option value="dark"  <%= theme === 'dark' ? 'selected' : '' %>>Ciemny</option>
             <option value="light" <%= theme === 'light' ? 'selected' : '' %>>Jasny</option>
-            <option value="auto" <%= theme === 'auto' ? 'selected' : '' %>>Automatyczny</option>
+            <option value="auto"  <%= theme === 'auto' ? 'selected' : '' %>>Automatyczny</option>
           </select>
         </div>
       </div>
 
-      <!-- === Sekcja: Użytkownik === -->
+
+      <!-- =====================================================
+           👤 UŻYTKOWNIK
+      ====================================================== -->
       <div class="settings-group">
         <h4><i class="bi bi-person-circle"></i> Użytkownik</h4>
 
@@ -40,7 +46,34 @@
         </div>
       </div>
 
-      <!-- === Sekcja: System === -->
+
+      <!-- =====================================================
+           🪟 PASEK SYSTEMOWY (FOOTER)
+      ====================================================== -->
+      <div class="settings-group">
+        <h4><i class="bi bi-window-stack"></i> Pasek systemowy</h4>
+
+        <div class="setting-item">
+          <label for="footerMode">Styl paska dolnego</label>
+          <select id="footerMode" name="footerMode" class="form-select">
+            <option value="icons"      <%= footer.mode === 'icons' ? 'selected' : '' %>>Tylko ikony</option>
+            <option value="icons-text" <%= footer.mode === 'icons-text' ? 'selected' : '' %>>Ikony i tekst</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <label for="dateFormat">Format daty / zegara</label>
+          <select id="dateFormat" name="dateFormat" class="form-select">
+            <option value="horizontal" <%= footer.dateFormat === 'horizontal' ? 'selected' : '' %>>21 lis 2025 | 18:39</option>
+            <option value="vertical"   <%= footer.dateFormat === 'vertical' ? 'selected' : '' %>>21 lis 2025 / 18:39</option>
+          </select>
+        </div>
+      </div>
+
+
+      <!-- =====================================================
+           🔧 SYSTEM
+      ====================================================== -->
       <div class="settings-group">
         <h4><i class="bi bi-tools"></i> System</h4>
 
@@ -79,52 +112,60 @@
   </main>
 </div>
 
+
+<!-- =====================================================
+     🟦 AJAX zapis ustawień
+====================================================== -->
 <script>
-  // === Automatyczny zapis ustawień przez AJAX ===
-  document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("settingsForm");
-    const alertBox = document.getElementById("saveAlert");
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("settingsForm");
+  const alertBox = document.getElementById("saveAlert");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(form);
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-      const data = {};
-      formData.forEach((value, key) => {
-        data[key] = value === "on" ? true : value;
+    const formData = new FormData(form);
+    const data = {};
+
+    formData.forEach((value, key) => {
+      data[key] = value;
+    });
+
+    // Checkboxy — bo odznaczone nie lecą w FormData
+    data.notifications = document.getElementById("notifications").checked;
+    data.autoupdate = document.getElementById("autoupdate").checked;
+
+    try {
+      const res = await fetch("/ustawienia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
 
-      // Dodaj stan checkboxów ręcznie, bo nie wysyłają się, gdy są odznaczone
-      data.notifications = document.getElementById("notifications").checked;
-      data.autoupdate = document.getElementById("autoupdate").checked;
+      if (res.ok) {
+        // 🔵 pokaż alert "Zapisano"
+        alertBox.style.display = "block";
+        alertBox.classList.add("fade-in");
 
-      try {
-        const res = await fetch("/ustawienia", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-
-        if (res.ok) {
-          alertBox.style.display = "block";
-          alertBox.classList.add("fade-in");
-
-          // Odśwież motyw dynamicznie bez reloadu
-          if (data.theme) {
-            document.documentElement.setAttribute("data-theme", data.theme);
-          }
-
-          setTimeout(() => {
-            alertBox.style.display = "none";
-          }, 2500);
-        } else {
-          console.error("Błąd zapisu ustawień:", res.status);
+        // 🔵 Dynamiczna zmiana motywu bez reloadu
+        if (data.theme) {
+          document.documentElement.setAttribute("data-theme", data.theme);
         }
-      } catch (err) {
-        console.error("❌ Błąd:", err);
+
+        // 🔵 AUTOMATYCZNE ODŚWIEŻENIE STRONY
+        setTimeout(() => {
+          location.reload();
+        }, 600); // 0.6 sek — alert mignie, a potem reload
+
+      } else {
+        console.error("Błąd zapisu ustawień:", res.status);
       }
-    });
+
+    } catch (err) {
+      console.error("❌ Błąd:", err);
+    }
   });
+});
 </script>
 
-<%- include("partials/footer", { active: "settings" }) %>
+<%- include("partials/footer") %>

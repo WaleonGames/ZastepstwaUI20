@@ -76,24 +76,35 @@ body {
 
 /* Cały alert */
 .urgent-alert {
-  overflow: hidden;
   position: relative;
+  overflow: hidden;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Wewnętrzny pasek przewijany */
+/* Pasek przewijania */
 .urgent-alert-scroll {
   display: inline-block;
-  padding-left: 100%;        /* start: poza ekranem */
   animation: urgentMove 12s linear infinite;
+  padding-right: 40px; /* trochę odstępu od timera */
 }
 
+/* Timer — stoi w miejscu */
+#urgent-alert-timer {
+  margin-left: auto;
+  font-weight: bold;
+  color: #b30000; /* mocniejszy akcent */
+}
+
+/* Animacja przewijania */
 @keyframes urgentMove {
-  0% {
-    transform: translateX(0);       /* zaczyna poza ekranem po prawej */
+  from {
+    transform: translateX(100%);
   }
-  100% {
-    transform: translateX(-100%);   /* przewija cały tekst do lewego boku */
+  to {
+    transform: translateX(-100%);
   }
 }
 
@@ -104,135 +115,8 @@ body {
   color: var(--text-muted);
 }
 
-/* --------------------------------------------------------
- * === STRONA GŁÓWNA PUBLICZNEGO UCZNIA (zu-index) ===
- * -------------------------------------------------------- */
-
-/* --------------------------------------------------------
- * === STRONA GŁÓWNA PUBLICZNEGO UCZNIA (zu-index)
- * -------------------------------------------------------- */
-
-.zu-index {
-  background-color: var(--color-bg-main);
-  color: var(--text-main);
-  min-height: 100vh;
-  padding: 2rem 0;
-  transition: background 0.3s, color 0.3s;
-}
-
-/* --- Nagłówek sekcji --- */
-.zu-index h2 {
-  color: var(--color-accent);
-  font-weight: 700;
-  text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
-  margin-bottom: 2rem;
-}
-
-/* --- Kolumny i odstępy --- */
-.zu-index .row.g-3 {
-  row-gap: 1.5rem;
-}
-
-/* --- Karty główne --- */
-.zu-index .card {
-  background: var(--gradient-card) !important;
-  border: 1px solid var(--color-border) !important;
-  border-radius: 14px !important;
-  color: var(--text-main);
-  box-shadow: var(--shadow-dark);
-  transition: all 0.25s ease;
-}
-
-.zu-index .card:hover {
-  transform: translateY(-4px);
-  border-color: var(--color-accent) !important;
-  box-shadow: 0 0 12px rgba(88, 166, 255, 0.25);
-}
-
-/* --- Karty z linkami (hover-card) --- */
-.zu-index .hover-card {
-  cursor: pointer;
-  padding: 1.8rem 1.2rem;
-  background: var(--color-bg-card) !important;
-  text-align: center;
-  border-radius: 12px;
-  transition: background 0.25s ease, transform 0.25s ease;
-}
-
-.zu-index .hover-card i {
-  color: var(--color-accent);
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-  transition: transform 0.2s ease, color 0.3s ease;
-}
-
-.zu-index .hover-card:hover i {
-  color: var(--color-accent-hover);
-  transform: scale(1.15);
-}
-
-.zu-index .hover-card h5 {
-  color: var(--color-accent);
-  margin-bottom: 0.4rem;
-}
-
-.zu-index .hover-card p {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-
-/* --- Panel boczny (wydarzenia) --- */
-.zu-index .list-group-item {
-  background: var(--color-bg-card) !important;
-  border-color: var(--color-border) !important;
-  color: var(--text-secondary) !important;
-  transition: background 0.25s ease, color 0.25s ease;
-}
-
-.zu-index .list-group-item:hover {
-  background: rgba(88, 166, 255, 0.08) !important;
-  color: var(--text-main) !important;
-}
-
-/* --- Nagłówki kart bocznych --- */
-.zu-index .card-header {
-  font-weight: 600;
-  color: var(--color-accent);
-  border-bottom: 1px solid var(--color-border-light) !important;
-  background: transparent !important;
-}
-
-/* --- Panel statystyk --- */
-.zu-index .card-body p strong {
-  color: var(--color-accent);
-}
-
-/* --- Responsywność --- */
-@media (max-width: 991px) {
-  .zu-index {
-    padding: 1.2rem 0;
-  }
-
-  .zu-index h2 {
-    font-size: 1.5rem;
-  }
-}
-
-/* --------------------------------------------------------
- * === STRONA ZASTĘPSTW (zu-substitutions) ===
- * -------------------------------------------------------- */
-
-.zu-substitutions {
-  background-color: var(--color-bg-main);
-  color: var(--text-main);
-  min-height: 100vh;
-  font-family: "Segoe UI", sans-serif;
-  display: flex;
-  transition: background 0.3s, color 0.3s;
-}
-
 /* === Boczne menu z dwoma sekcjami === */
-.zu-substitutions .sidebar {
+.sidebar {
   width: 240px;
   background: var(--gradient-card);
   border-right: 1px solid var(--color-border-light);
@@ -253,11 +137,11 @@ body {
 }
 
 /* --- Górna sekcja (dni) --- */
-.zu-substitutions .sidebar-top {
+.sidebar-top {
   margin-bottom: 1rem;
 }
 
-.zu-substitutions .sidebar .day {
+.sidebar .day {
   display: block;
   padding: 10px 14px;
   text-decoration: none;
@@ -267,12 +151,12 @@ body {
   transition: all 0.25s ease;
 }
 
-.zu-substitutions .sidebar .day:hover {
+.sidebar .day:hover {
   background: rgba(88, 166, 255, 0.08);
   color: var(--color-accent);
 }
 
-.zu-substitutions .sidebar .day.active {
+.sidebar .day.active {
   background: rgba(88, 166, 255, 0.2);
   color: var(--color-accent);
   font-weight: 600;
@@ -280,10 +164,155 @@ body {
 }
 
 /* --- Dolna sekcja (filtry) --- */
-.zu-substitutions .sidebar-bottom {
+.sidebar-bottom {
   border-top: 1px solid var(--color-border);
   padding-top: 1rem;
 }
+
+/* ============================================================
+ * GRID
+ * ============================================================ */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 26px;
+  padding: 40px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+ * KAFELKI (card-box)
+ * ============================================================ */
+.card-box {
+  background: #11151d;
+  border: 1px solid #1f2530;
+  border-radius: 16px;
+  padding: 26px;
+  transition: 0.25s;
+  min-height: 200px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover efekt */
+.card-box:hover::after {
+  opacity: 0.12;
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+ * DUŻE IKONY W TLE KAŻDEJ KARTY (Windows 11 effect)
+ * ============================================================ */
+.card-box::after {
+  content: "";
+  position: absolute;
+  right: 10px;      /* przesunięcie bardziej w prawo */
+  bottom: 10px;     /* ikona wyżej, ładniejsze wyrównanie */
+  font-family: "bootstrap-icons";
+  font-size: 3.5rem; /* mniejsza ikona = bardziej elegancka */
+  opacity: 0.06;     /* dużo bardziej subtelna */
+  color: #ffffff;
+  pointer-events: none;
+  transition: 0.3s ease;
+}
+
+/* Hover – ikona jaśniejsza i lekko unosi się */
+.card-box:hover::after {
+  opacity: 0.20;
+  transform: translateY(-4px);
+}
+
+/* --- Ikony przypisane do linków --- */
+a[href="/zastepstwa"] .card-box::after {
+  content: "\f1ec"; /* calendar-week */
+}
+
+a[href="/nauczyciele"] .card-box::after {
+  content: "\f4d7"; /* people-fill */
+}
+
+a[href="/klasy"] .card-box::after {
+  content: "\f194"; /* book */
+}
+
+/* ============================================================
+ * ZAWARTOŚĆ KAFELKÓW
+ * ============================================================ */
+.card-title {
+  font-size: 1.55rem !important; /* idealny rozmiar */
+  font-weight: 600;
+  color: #58a6ff;
+  margin-bottom: 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-title i {
+  font-size: 1.6rem; /* ikona większa i dopasowana */
+}
+
+.card-box p {
+  color: #9ba7b4;
+  margin: 0;
+  font-size: 1.05rem; /* powiększony opis */
+}
+
+/* ============================================================
+ * Nagłówek strony
+ * ============================================================ */
+.page-title {
+  text-align: center;
+  margin: 40px 0 20px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #58a6ff;
+  text-shadow: 0 0 10px rgba(88, 166, 255, 0.3);
+}
+
+.page-title i {
+  margin-right: 8px;
+}
+
+/* ============================================================
+ * Responsywność
+ * ============================================================ */
+@media (max-width: 768px) {
+  .dashboard-grid {
+    padding: 20px;
+    gap: 18px;
+  }
+
+  .card-box {
+    min-height: 170px;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* --------------------------------------------------------
+ * === STRONA ZASTĘPSTW (zu-substitutions) ===
+ * -------------------------------------------------------- */
+
+.zu-substitutions {
+  background-color: var(--color-bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* === Boczne menu z dwoma sekcjami === */
 
 .zu-substitutions .filter-form {
   background: var(--color-bg-card);
@@ -886,8 +915,10 @@ body {
 /* --- Siatka nauczycieli --- */
 .zu-teachers .osoby-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fill, 280px); /* stała szerokość */
+  grid-auto-rows: 350px;                           /* stała wysokość */
   gap: 1.5rem;
+  justify-content: center;                         /* wyrównanie do środka */
 }
 
 /* --- Karta nauczyciela --- */
@@ -1204,20 +1235,32 @@ body {
   align-items: center;
 }
 
-/* ---------------------------------------
- *  LEWY DOCK – IKONY APLIKACJI
- * --------------------------------------- */
+/* ======================================
+ * LEWY DOCK — MODULARNY
+ * icons / icons-text
+ * ====================================== */
+
 .footer-left {
   display: flex;
   gap: 18px;
   align-items: center;
 }
 
+/* OGÓLNA IKONA */
 .dock-icon {
   color: #a5b1c2;
   font-size: 1.55rem;
   text-decoration: none;
   transition: 0.22s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* IKONA AKTYWNA */
+.dock-icon.active {
+  color: var(--color-accent, #58a6ff);
+  text-shadow: 0 0 8px rgba(88,166,255,.4);
 }
 
 .dock-icon:hover {
@@ -1225,41 +1268,79 @@ body {
   transform: translateY(-4px);
 }
 
-.dock-icon.active {
-  color: var(--color-accent, #58a6ff);
-  text-shadow: 0 0 8px rgba(88,166,255,.4);
+/* TRYB: ICONS (same ikony) */
+.footer-icons .dock-icon span {
+  display: none;
 }
 
-/* ---------------------------------------
- *  PRAWY DOCK — ZEGAR WINDOWS-STYLE
- * --------------------------------------- */
+/* TRYB: ICONS-TEXT (ikona + podpis) */
+.footer-icons-text .dock-icon i {
+  margin-bottom: 2px;
+}
+
+.footer-icons-text .dock-icon span {
+  font-size: 0.67rem;
+  opacity: 0.8;
+  margin-top: 3px;
+  display: block;
+}
+
+/* ======================================
+ * PRAWY DOCK — ZEGAR WINDOWS-STYLE
+ * Obsługuje horizontal / vertical
+ * ====================================== */
+
 .footer-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
   cursor: pointer;
   padding: 6px 10px;
   border-radius: 10px;
   transition: 0.25s;
+  display: flex;
+  align-items: flex-end;
 }
 
 .footer-right:hover {
   background: #151c23;
 }
 
+/* TRYB: horizontal → 21 lis 2025 | 18:39 */
+.date-horizontal {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.date-horizontal .separator {
+  opacity: 0.6;
+  font-weight: 600;
+}
+
+/* TRYB: vertical → 21 lis 2025 / 18:39 (pod sobą) */
+.date-vertical {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.date-vertical .separator-vertical {
+  display: none;
+}
+
+/* CZAS */
 .footer-right .time {
   font-size: 1.25rem;
   font-weight: 700;
 }
 
+/* DATA */
 .footer-right .date {
   font-size: 0.85rem;
   opacity: 0.8;
 }
 
-/* ------------------------------------------------------------------------------------
- *  NOWY PANEL WINDOWS-STYLE — calendar-embed (otwierany z prawego docka)
- * ------------------------------------------------------------------------------------ */
+/* =====================================================================================
+ *  📅 PANEL KALENDARZA – WINDOWS-STYLE
+ *  Ujednolicony, scalony, bez duplikacji klas
+ * ===================================================================================== */
 
 .calendar-embed {
   position: fixed;
@@ -1276,7 +1357,9 @@ body {
   z-index: 3000;
 }
 
-/* GÓRA KALENDARZA */
+/* -------------------------------
+ *  GÓRA: nazwa dnia + pełna data
+ * ------------------------------- */
 .cal-top {
   margin-bottom: 12px;
 }
@@ -1293,7 +1376,9 @@ body {
   margin-top: 4px;
 }
 
-/* Pasek miesiąca */
+/* -------------------------------
+ *  Pasek nagłówka miesiąca
+ * ------------------------------- */
 .cal-month-header {
   display: flex;
   justify-content: center;
@@ -1317,7 +1402,9 @@ body {
   background: #2c323a;
 }
 
-/* Grids */
+/* -------------------------------
+ *  GRID DNI
+ * ------------------------------- */
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -1332,20 +1419,72 @@ body {
   font-size: 0.92rem;
 }
 
-/* Dni tygodnia */
+/* -------------------------------
+ *  Nagłówek dni tygodnia
+ * ------------------------------- */
 .cal-weekdays div {
   color: #9198a1;
   font-weight: 600;
 }
 
-/* Dzisiejszy dzień */
-.today {
-  background: #fff !important;
-  color: #000 !important;
+.cal-weekdays .weekend {
+  color: #d62828;
+}
+
+/* -------------------------------
+ *  Pojedynczy dzień
+ * ------------------------------- */
+.cal-day {
+  padding: 6px;
+  text-align: center;
+  border-radius: 6px;
+  cursor: default;
+  transition: 0.15s;
+}
+
+/* Hover do tooltipów bootstrap */
+.cal-day:hover {
+  background: #2a313a;
+}
+
+/* -------------------------------
+ *  Dziś
+ * ------------------------------- */
+.cal-day.today {
+  background: #1f6feb;
+  color: white;
+  font-weight: 700;
+  border: 1px solid #1f6feb;
+}
+
+/* -------------------------------
+ *  Weekend (sob+ndz)
+ * ------------------------------- */
+.weekend-day {
+  background: #ffe5e5 !important;
+  border: 1px solid #d62828 !important;
+  color: #b40000 !important;
+  font-weight: 600;
+}
+
+/* -------------------------------
+ *  Dni wolne z calendar.json
+ * ------------------------------- */
+.free-day {
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #c62828;
+}
+
+.free-day.today {
+  background: #ffcdd2 !important;
+  color: #8e0000 !important;
   font-weight: bold !important;
 }
 
-/* Sekcje w dolnej części panelu */
+/* -------------------------------
+ *  Sekcje dolne
+ * ------------------------------- */
 .cal-section {
   background: #20262e;
   padding: 14px;
@@ -1358,12 +1497,44 @@ body {
   padding: 10px;
   border-radius: 12px;
   margin-bottom: 8px;
+  font-size: 0.9rem;
 }
 
 .school-item h5 {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
+}
+
+/* -------------------------------
+ *  Legenda
+ * ------------------------------- */
+.cal-legend {
+  font-size: 0.8rem;
+  color: #bfbfbf;
+  margin-top: 10px;
+}
+
+.legend-color {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  margin-right: 6px;
+}
+
+.legend-color.weekend {
+  background: #ffe5e5;
+  border: 1px solid #d62828;
+}
+
+.legend-color.today {
+  background: #1f6feb;
+}
+
+.legend-color.free {
+  background: #ffcdd2;
+  border: 1px solid #b40000;
 }
 
 /* ------------------------------------------------------
